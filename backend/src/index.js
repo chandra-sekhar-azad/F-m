@@ -89,19 +89,22 @@ app.use((err, req, res, next) => {
 });
 
 // Startup
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} 🚀`);
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`PORT env: ${process.env.PORT}`);
+});
+
+// Connect to MongoDB and load data after server is already listening
 (async () => {
   try {
-    // Mongo Connections
     await connectToMongo('branch-1', process.env.MONGODB_URI_BRANCH1);
     await connectToMongo('branch-2', process.env.MONGODB_URI_BRANCH2);
     await connectToMongo('reviews', process.env.MONGODB_URI_REVIEWS);
-
-    // Persistence
     await loadBookings(branchDbs);
     await loadTimeSlots(branchDbs);
     await loadBranchPricingData();
-
-    app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT} 🚀`));
+    console.log('✓ All data sources initialised');
   } catch (error) {
     console.error('Startup Error:', error);
   }

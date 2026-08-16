@@ -1,1 +1,0 @@
-import{j as e}from"./vendor-ui-CMbzKyuk.js";import{R as s}from"./index-0q8OXsVC.js";import"./vendor-react-DD6LBbyf.js";import"./vendor-icons-B78dHiJA.js";const a=()=>e.jsx("div",{className:"min-h-screen bg-[#0a0a0a] pt-20",children:e.jsx(s,{showReviews:!1})});export{a as default};

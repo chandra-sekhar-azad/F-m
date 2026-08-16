@@ -926,7 +926,11 @@ const BookingPage = () => {
                     { label: "Occasion", value: booking.occasion === "Other" ? booking.customOccasion || "Other" : booking.occasion },
                     ...(isPremiumPack ? [] : [{ label: "Decoration", value: `Yes` }]),
                     {
-                      label: "Offer price",
+                      label: (() => {
+                        const servicePrice = pricing[booking.service]?.[booking.duration];
+                        if (typeof servicePrice === 'object' && servicePrice?.offerPrice != null) return "Offer price";
+                        return "Price";
+                      })(),
                       value: (() => {
                         const servicePrice = pricing[booking.service]?.[booking.duration];
                         if (!servicePrice) return "N/A";
@@ -934,10 +938,10 @@ const BookingPage = () => {
                           const hasOfferPrice = servicePrice.offerPrice !== undefined && servicePrice.offerPrice !== null;
                           if (hasOfferPrice) {
                             return (
-                              <div className="flex items-center gap-2 justify-end">
-                                <span className="line-through text-muted-foreground/60 italic">₹{servicePrice.price}</span>
-                                <span className="text-secondary font-bold text-lg animate-pulse">₹{servicePrice.offerPrice}</span>
-                                <span className="text-[9px] bg-secondary/20 px-1.5 py-0.5 rounded-full text-secondary font-bold uppercase tracking-wider animate-bounce">Offer</span>
+                              <div className="flex items-center gap-1.5 justify-end flex-wrap">
+                                <span className="text-secondary font-bold text-base">₹{servicePrice.offerPrice}</span>
+                                <span className="line-through text-muted-foreground/50 italic text-[10px]">₹{servicePrice.price}</span>
+                                <span className="text-[9px] bg-secondary/20 px-1.5 py-0.5 rounded-full text-secondary font-bold uppercase tracking-wider whitespace-nowrap">Offer</span>
                               </div>
                             );
                           }
@@ -965,9 +969,9 @@ const BookingPage = () => {
                         : "None"
                     }] : []),
                   ].map((item) => (
-                    <div key={item.label} className="flex justify-between border-b border-border pb-3 items-center">
-                      <span className="text-xs text-muted-foreground font-body">{item.label}</span>
-                      <div className="text-xs font-medium text-foreground font-body">{item.value as any}</div>
+                    <div key={item.label} className="flex justify-between border-b border-border pb-3 items-start gap-4">
+                      <span className="text-xs text-muted-foreground font-body shrink-0">{item.label}</span>
+                      <div className="text-xs font-medium text-foreground font-body text-right">{item.value as any}</div>
                     </div>
                   ))}
 

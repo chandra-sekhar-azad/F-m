@@ -24,7 +24,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Static frontend — served from backend/public/ (built from frontend/dist/)
-const publicDir = path.resolve(__dirname, '../../public');
+const publicDir = path.resolve(__dirname, '../public');
 app.use(express.static(publicDir));
 
 // Middleware

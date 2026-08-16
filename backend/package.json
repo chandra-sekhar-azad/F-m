@@ -5,9 +5,9 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "node --watch src/index.js",
+    "dev": "node --watch server.js",
     "build": "echo 'Frontend is pre-built into backend/public — no build step needed'",
-    "start": "node src/index.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

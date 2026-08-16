@@ -1,6 +1,8 @@
 import './config/env.js'; // load env vars from root .env
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectToMongo, getBranchModels } from './config/mongo.js';
 import { branchDbs, globalDb } from './config/constants.js';
 import { loadBookings, loadTimeSlots } from './utils/persistence.js';
@@ -15,8 +17,15 @@ import paymentRoutes from './routes/payment.js';
 
 import { corsOptions } from './middleware/cors.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Static frontend — served from backend/public/ (built from frontend/dist/)
+const publicDir = path.resolve(__dirname, '../../public');
+app.use(express.static(publicDir));
 
 // Middleware
 app.use(cors(corsOptions));
@@ -67,10 +76,12 @@ app.get('/api/debug/bookings-count', async (req, res) => {
   res.json({ counts, total, timestamp: new Date(), storage: Object.keys(counts).map(id => ({ id, type: getBranchModels(id) ? 'MongoDB' : 'File' })) });
 });
 
-app.get('/', (req, res) => res.send('Friends & Memories Backend is running 🚀'));
+// SPA fallback — all non-API routes serve the React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
 
-// 404 & Error Handlers
-app.use((req, res) => res.status(404).json({ error: 'Route not found', path: req.path }));
+// Error Handlers
 app.use((err, req, res, next) => {
   if (err?.type === 'entity.too.large') return res.status(413).json({ error: 'Payload too large' });
   console.error('Error:', err);

@@ -5,7 +5,6 @@ const allowedOrigins = [
   'http://localhost:8080',
   'https://friendsandmemories.in',
   'https://www.friendsandmemories.in',
-  'https://api.friendsandmemories.in',
 ];
 
 export const corsOptions = {

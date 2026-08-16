@@ -51,3 +51,6 @@ data/bookings/
 # ── Old platform configs (deleted, keep ignored in case re-added) ─────────────
 vercel.json
 Procfile
+
+# public/ is intentionally committed — built frontend served by Express
+# Build with: cd ../frontend && npm run build

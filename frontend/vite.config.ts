@@ -27,6 +27,9 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
   build: {
+    // Output directly into backend/public so Express can serve it
+    outDir: "../backend/public",
+    emptyOutDir: true,
     // Split vendor libraries into separate chunks so browsers can cache them independently
     rollupOptions: {
       output: {

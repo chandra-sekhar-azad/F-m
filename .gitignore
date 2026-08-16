@@ -77,3 +77,6 @@ backend/src/data/*.bak
 backend/vercel.json
 backend/Procfile
 .vercel/
+
+# backend/public/ is intentionally committed — it contains the built frontend
+# served by Express. Build with: cd frontend && npm run build

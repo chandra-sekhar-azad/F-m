@@ -4,6 +4,7 @@
     "address": "Sri Ambica Heights, Dr. Jagan Mohan Rao st,Beside Navayuga Fast Foods,Near Fire Station,Eluru 534006",
     "phone": "+91 76800 06662",
     "mapLink": "https://maps.app.goo.gl/7oyW9cQGTGrTsM2Z8",
+    "halls": [],
     "cakes": [
       {
         "id": "cake-1",
@@ -166,6 +167,16 @@
     "address": "4-Masid St, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
     "phone": "+91 99127 10932",
     "mapLink": "https://maps.app.goo.gl/hc31fqJaDx6Veqkv7",
+    "halls": [
+      {
+        "id": "hall-1",
+        "name": "Hall 1"
+      },
+      {
+        "id": "hall-2",
+        "name": "Hall 2"
+      }
+    ],
     "cakes": [
       {
         "id": "cake-1",

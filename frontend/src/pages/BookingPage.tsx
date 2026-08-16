@@ -71,6 +71,7 @@ const BookingPage = () => {
   const [decorationPrice, setDecorationPrice] = useState(0);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [halls, setHalls] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   // Per-step lazy loading states
   const [occasionsLoaded, setOccasionsLoaded] = useState(false);
@@ -161,6 +162,7 @@ const BookingPage = () => {
         setBranches(data.branches);
         setPricing(data.pricing);
         setDecorationPrice(data.decorationPrice);
+        setHalls(data.halls || []);
         setLastFetchedBranch(initialBranch);
 
         const services = Object.keys(data.pricing);
@@ -184,6 +186,7 @@ const BookingPage = () => {
           const data = await api.getStepBranchService(booking.branch);
           setPricing(data.pricing);
           setDecorationPrice(data.decorationPrice);
+          setHalls(data.halls || []);
           setLastFetchedBranch(booking.branch);
 
           // Invalidate step caches so they reload for the new branch
@@ -198,11 +201,14 @@ const BookingPage = () => {
           if (services.length === 1) {
             setBooking(prev => ({
               ...prev,
+              hall: '',  // reset hall on branch change
               service: services[0] as any,
               membersCount: (isBhimavaram && prev.membersCount > 10) ? 10 : prev.membersCount,
             }));
           } else if (isBhimavaram) {
-            setBooking(prev => prev.membersCount > 10 ? { ...prev, membersCount: 10 } : prev);
+            setBooking(prev => ({ ...prev, hall: '', ...(prev.membersCount > 10 ? { membersCount: 10 } : {}) }));
+          } else {
+            setBooking(prev => ({ ...prev, hall: '' }));
           }
         } catch (error) {
           console.error("Failed to update branch data:", error);
@@ -216,7 +222,7 @@ const BookingPage = () => {
     if (booking.branch && booking.date && booking.service && booking.duration) {
       const loadSlots = async () => {
         try {
-          const { availableSlots, bookedSlots } = await api.getAvailableSlots(booking.branch, booking.date, booking.service, booking.duration);
+          const { availableSlots, bookedSlots } = await api.getAvailableSlots(booking.branch, booking.date, booking.service, booking.duration, false, booking.hall || undefined);
           setAvailableSlots(availableSlots);
           setBookedSlots(bookedSlots);
         } catch (error) {
@@ -225,7 +231,7 @@ const BookingPage = () => {
       };
       loadSlots();
     }
-  }, [booking.branch, booking.date, booking.service, booking.duration]);
+  }, [booking.branch, booking.date, booking.service, booking.duration, booking.hall]);
 
   // Step 2: occasions — tiny payload, cached after first load
   useEffect(() => {
@@ -365,6 +371,8 @@ const BookingPage = () => {
         if (!booking.branch || !booking.service) return false;
         const selectedBranch = branches.find(b => b.id === booking.branch);
         if (selectedBranch?.bookingsEnabled === false) return false;
+        // require hall selection if this branch has multiple halls
+        if (halls.length > 0 && !booking.hall) return false;
         return true;
       }
       case 1:
@@ -693,6 +701,35 @@ const BookingPage = () => {
                       })}
                     </div>
                   </div>
+                  {/* Hall selector — only shown when selected branch has multiple halls */}
+                  {halls.length > 0 && (
+                    <div>
+                      <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Hall</label>
+                      <div className="grid gap-3 grid-cols-2">
+                        {halls.map((hall) => (
+                          <button
+                            key={hall.id}
+                            onClick={() => update({ hall: hall.id })}
+                            className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all text-left ${
+                              booking.hall === hall.id
+                                ? "border-primary glow-gold bg-muted shadow-lg"
+                                : "border-border hover:border-primary hover:shadow-md"
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg ${booking.hall === hall.id ? "bg-primary/20" : "bg-muted"}`}>
+                              <Film className={`h-5 w-5 ${booking.hall === hall.id ? "text-primary" : "text-muted-foreground"}`} />
+                            </div>
+                            <div>
+                              <p className="font-bold text-foreground text-sm font-body">{hall.name}</p>
+                              {booking.hall === hall.id && (
+                                <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Selected ✓</span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label className="mb-3 block text-sm font-medium text-foreground font-body">Service</label>
                     <div className="grid gap-3 md:grid-cols-1">
@@ -918,6 +955,7 @@ const BookingPage = () => {
                 <div className="space-y-4">
                   {[
                     { label: "Branch", value: branches.find((b) => b.id === booking.branch)?.name },
+                    ...(booking.hall ? [{ label: "Hall", value: halls.find(h => h.id === booking.hall)?.name || booking.hall }] : []),
                     { label: "Service", value: formatServiceName(booking.service || "") },
                     { label: "Date", value: booking.date },
                     { label: "Time", value: `${booking.timeSlot} (${booking.duration}hr)` },

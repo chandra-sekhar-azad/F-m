@@ -45,8 +45,20 @@ export const getCatalogForBranch = async (branchId = 'branch-1') => {
     let doc = await models.BranchCatalog.findOne({ branch: branchId });
     
     if (!doc) {
-      doc = await models.BranchCatalog.create({ branch: branchId, ...defaultData });
+      // Include halls from file-based data when creating new doc
+      const fileCatalog = branchPricingDbs[branchId];
+      const halls = fileCatalog?.halls || defaultData.halls || [];
+      doc = await models.BranchCatalog.create({ branch: branchId, ...defaultData, halls });
     } else {
+      // MIGRATION: if halls not in DB yet, pull from file-based store
+      if (!doc.halls || doc.halls.length === 0) {
+        const fileCatalog = branchPricingDbs[branchId];
+        if (fileCatalog?.halls?.length > 0) {
+          await models.BranchCatalog.updateOne({ branch: branchId }, { $set: { halls: fileCatalog.halls } });
+          doc.halls = fileCatalog.halls;
+        }
+      }
+
       // MIGRATION: Merge new services from defaultPricing into existing pricing
       const pricing = doc.pricing || {};
       const mergedPricing = { ...defaultPricing };
@@ -134,6 +146,7 @@ export const saveCatalogForBranch = async (branchId, catalog) => {
       if (catalog.galleryVideos !== undefined) updateData.galleryVideos = catalog.galleryVideos;
       if (catalog.socialLinks !== undefined) updateData.socialLinks = catalog.socialLinks;
       if (catalog.bookingsEnabled !== undefined) updateData.bookingsEnabled = catalog.bookingsEnabled;
+      if (catalog.halls !== undefined) updateData.halls = catalog.halls;
 
       await models.BranchCatalog.findOneAndUpdate(
         { branch: branchId },

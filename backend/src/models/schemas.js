@@ -33,6 +33,7 @@ export const getEffectivePrice = (item) => {
 export const bookingSchema = new mongoose.Schema({
   id: String,
   branch: String,
+  hall: String,       // hall identifier within a branch (e.g. 'hall-1', 'hall-2')
   service: String,
   date: String,
   duration: Number,
@@ -80,6 +81,7 @@ export const branchCatalogSchema = new mongoose.Schema(
     address: { type: String },
     phone: { type: String },
     mapLink: { type: String },
+    halls: { type: [mongoose.Schema.Types.Mixed], default: [] }, // [{id, name}] — empty means single hall
     pricing: { type: mongoose.Schema.Types.Mixed, default: () => JSON.parse(JSON.stringify(defaultPricing)) },
     decorationPrice: { type: Number, default: 1500 },
     cakes: { type: [mongoose.Schema.Types.Mixed], default: () => JSON.parse(JSON.stringify(defaultCakes.map(c => ({ ...c, quantity: '1kg' })))) },

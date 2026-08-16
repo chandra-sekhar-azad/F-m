@@ -40,9 +40,10 @@ JWT_SECRET=your_secret_key
 ADMIN_PASSWORD=admin123
 MONGODB_URI_BRANCH1=your_mongodb_uri
 MONGODB_URI_BRANCH2=your_mongodb_uri
-CHATMITRA_API_URL=your_chat_mitra_endpoint
-CHATMITRA_API_KEY=your_chat_mitra_api_key
-CHATMITRA_AUTH_TOKEN=optional_bearer_token
+WHATSAPP_GATEWAY_URL=https://your-gateway-host.com
+WHATSAPP_API_TOKEN=your_api_token_here
+WHATSAPP_SESSION=default
+WHATSAPP_SESSION_PASSWORD=your_session_password_here
 ADMIN_PHONE_1=branch_1_admin_whatsapp_number
 ADMIN_PHONE_2=branch_2_admin_whatsapp_number
 ```
@@ -147,9 +148,10 @@ git push heroku main
 - `ADMIN_PASSWORD` - Admin login password
 - `MONGODB_URI_BRANCH1` - MongoDB connection string for branch 1
 - `MONGODB_URI_BRANCH2` - MongoDB connection string for branch 2
-- `CHATMITRA_API_URL` - Chat Mitra WhatsApp send-message endpoint
-- `CHATMITRA_API_KEY` - Optional Chat Mitra API key header value
-- `CHATMITRA_AUTH_TOKEN` - Optional bearer token for Chat Mitra
+- `WHATSAPP_GATEWAY_URL` - WhatsApp API Gateway base URL (required)
+- `WHATSAPP_API_TOKEN` - Bearer token for gateway authentication (required)
+- `WHATSAPP_SESSION` - Gateway session name used for QR pairing (optional, default: "default")
+- `WHATSAPP_SESSION_PASSWORD` - Password to protect new session creation (optional)
 - `ADMIN_PHONE_1` - Branch 1 admin WhatsApp number used for booking notifications
 - `ADMIN_PHONE_2` - Branch 2 admin WhatsApp number used for booking notifications
 

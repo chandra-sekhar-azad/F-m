@@ -32,6 +32,7 @@ export interface ExtraDecoration {
 
 export interface BookingData {
   branch: string;
+  hall: string;       // hall within the branch (empty string = no hall selection needed)
   service: "private-theatre-party-hall" | "premium-pack" | "";
   date: string;
   duration: number;
@@ -171,6 +172,7 @@ export const DECORATION_PRICE = 1500;
 
 export const INITIAL_BOOKING: BookingData = {
   branch: "branch-1",
+  hall: "",
   service: "private-theatre-party-hall",
   date: "",
   duration: 0,

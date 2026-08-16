@@ -81,6 +81,7 @@ export const createBranchPricingDb = (branchId) => {
     address: branchInfo?.address,
     phone: branchInfo?.phone,
     mapLink: branchInfo?.mapLink,
+    halls: [],  // branches with multiple halls set this; empty = single hall
     cakes: JSON.parse(JSON.stringify(defaultCakes.map(c => ({ ...c, quantity: '1kg' })))),
     decorations: JSON.parse(JSON.stringify(defaultDecorations)),
     pricing: JSON.parse(JSON.stringify(defaultPricing)),
@@ -104,6 +105,7 @@ export const cloneBranchPricingDb = (data = {}) => ({
   address: data.address,
   phone: data.phone,
   mapLink: data.mapLink,
+  halls: JSON.parse(JSON.stringify(data.halls || [])),
   cakes: JSON.parse(JSON.stringify(data.cakes || defaultCakes.map(c => ({ ...c, quantity: '1kg' })))),
   decorations: JSON.parse(JSON.stringify(data.decorations || defaultDecorations)),
   pricing: JSON.parse(JSON.stringify(data.pricing || defaultPricing)),

@@ -31,12 +31,13 @@ router.get('/step/branch-service/:branchId', async (req, res) => {
           phone: bCatalog.phone || '',
           mapLink: bCatalog.mapLink || '',
           bookingsEnabled: bCatalog.bookingsEnabled !== false,
+          halls: bCatalog.halls || [],
         });
       }
     }
 
     res.set('Cache-Control', 'no-store');
-    res.json({ branches, pricing: catalog.pricing, decorationPrice: catalog.decorationPrice ?? 1500 });
+    res.json({ branches, pricing: catalog.pricing, decorationPrice: catalog.decorationPrice ?? 1500, halls: catalog.halls || [] });
   } catch (err) {
     console.error('[step/branch-service]', err);
     res.status(500).json({ error: 'Failed to load step data' });

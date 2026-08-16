@@ -9,6 +9,7 @@ export interface Branch {
   phone: string;
   mapLink?: string;
   bookingsEnabled?: boolean;
+  halls?: { id: string; name: string }[];
 }
 
 export interface CakeOption {
@@ -326,9 +327,10 @@ export const api = {
     return res.json();
   },
 
-  async getAvailableSlots(branchId: string, date: string, service: string, duration: number, isAdmin = false): Promise<{ availableSlots: string[], bookedSlots: string[] }> {
+  async getAvailableSlots(branchId: string, date: string, service: string, duration: number, isAdmin = false, hall?: string): Promise<{ availableSlots: string[], bookedSlots: string[] }> {
     const params = new URLSearchParams({ duration: String(duration) });
     if (isAdmin) params.set('admin', 'true');
+    if (hall) params.set('hall', hall);
     const res = await fetch(`${API_BASE}/bookings/availability/${branchId}/${date}/${service}?${params.toString()}`);
     if (!res.ok) throw new Error("Failed to fetch available slots");
     const data = await res.json();
@@ -675,6 +677,7 @@ export const api = {
     branches: Branch[];
     pricing: Record<string, Record<any, any>>;
     decorationPrice: number;
+    halls: { id: string; name: string }[];
   }> {
     const res = await fetch(`${API_BASE}/bookings/step/branch-service/${branchId}?t=${Date.now()}`);
     if (!res.ok) throw new Error("Failed to load branch/service data");

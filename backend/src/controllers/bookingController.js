@@ -58,19 +58,21 @@ export const createBooking = async (req, res) => {
 
     let existingBookings = [];
     if (models) {
-      // Find both paid (confirmed) and pending (in-process) bookings for conflict check
-      existingBookings = await models.Booking.find({ 
+      // For multi-hall branches, conflict check is scoped to the same hall
+      const conflictQuery = { 
         branch, 
         date: booking.date, 
-        service: booking.service,
         paymentStatus: { $in: ['paid', 'pending'] } 
-      });
+      };
+      if (booking.hall) conflictQuery.hall = booking.hall;
+      existingBookings = await models.Booking.find(conflictQuery);
     } else if (branchDb) {
-      existingBookings = branchDb.bookings.filter(b => 
-        b.date === booking.date && 
-        b.service === booking.service && 
-        ['paid', 'pending'].includes(b.paymentStatus)
-      );
+      existingBookings = branchDb.bookings.filter(b => {
+        if (b.date !== booking.date) return false;
+        if (!['paid', 'pending'].includes(b.paymentStatus)) return false;
+        if (booking.hall && b.hall && b.hall !== booking.hall) return false;
+        return true;
+      });
     }
 
     const startMinutes = parse12HourTime(booking.timeSlot);
@@ -451,6 +453,7 @@ export const deleteMultipleBookings = async (req, res) => {
 export const getAvailability = async (req, res) => {
   const { branchId, date, service } = req.params;
   const duration = Number(req.query.duration || 1);
+  const hall = req.query.hall || null; // optional hall filter for multi-hall branches
   const branchDb = branchDbs[branchId];
   const models = getBranchModels(branchId);
   
@@ -465,25 +468,20 @@ export const getAvailability = async (req, res) => {
   try {
     let bookings = [];
     if (models) {
-      // Get PAID or PARTIALLY-PAID bookings for ANY service to mark slots as blocked
-      // Since all services share the same physical space
-      bookings = await models.Booking.find({ 
-        branch: branchId, 
-        date, 
-        paymentStatus: { $in: ['paid', 'partially-paid'] } 
-      });
+      // For multi-hall branches, filter by hall so slots are independent per hall
+      const query = { branch: branchId, date, paymentStatus: { $in: ['paid', 'partially-paid'] } };
+      if (hall) query.hall = hall;
+      bookings = await models.Booking.find(query);
     } else if (branchDb) {
-      // Get PAID or PARTIALLY-PAID bookings for ANY service to mark slots as blocked
-      bookings = branchDb.bookings.filter(b => 
-        b.date === date && 
-        ['paid', 'partially-paid'].includes(b.paymentStatus)
-      );
+      bookings = branchDb.bookings.filter(b => {
+        if (b.date !== date) return false;
+        if (!['paid', 'partially-paid'].includes(b.paymentStatus)) return false;
+        if (hall && b.hall && b.hall !== hall) return false;
+        return true;
+      });
     }
     
-    console.log(`📋 Availability check for ${branchId} on ${date}: Found ${bookings.length} paid bookings across all services`);
-    if (bookings.length > 0) {
-      bookings.forEach(b => console.log(`  - Booking: ${b.id} | Time: ${b.timeSlot} | Duration: ${b.duration}h | Status: ${b.paymentStatus}`));
-    }
+    console.log(`📋 Availability check for ${branchId}${hall ? ` hall:${hall}` : ''} on ${date}: Found ${bookings.length} paid bookings`);
     
     const availableSlots = getAvailableStartSlots(bookings, duration);
     const bookedSlotsList = bookings.reduce((acc, b) => {

@@ -18,4 +18,4 @@ const booking = {
 };
 
 const result = await sendAdminSmsNotification(booking);
-console.log('ChatMitra SMS result:', result);
+console.log('WhatsApp Gateway admin notification result:', result);

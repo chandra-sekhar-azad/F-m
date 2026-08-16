@@ -68,7 +68,7 @@ const BookingPage = () => {
   const [cakes, setCakes] = useState<CakeOption[]>([]);
   const [decorations, setDecorations] = useState<ExtraDecoration[]>([]);
   const [pricing, setPricing] = useState<Record<string, Record<any, any>>>({});
-  const [decorationPrice, setDecorationPrice] = useState(DECORATION_PRICE);
+  const [decorationPrice, setDecorationPrice] = useState(0);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);

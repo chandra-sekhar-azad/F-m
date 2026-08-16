@@ -83,7 +83,7 @@ const AdminCampaign = ({ token, selectedBranch }: AdminCampaignProps) => {
 
     try {
       setSending(true);
-      await api.sendWhatsAppCampaign(token, selectedBranch, message, allRecipients);
+      await api.sendWhatsAppCampaign(token, message, undefined, allRecipients);
       setSuccess(`Successfully initiated campaign for ${allRecipients.length} recipients!`);
       setMessage("");
       setSelectedPhones([]);

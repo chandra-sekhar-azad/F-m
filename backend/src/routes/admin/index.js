@@ -10,7 +10,7 @@ import galleryRouter from './gallery.js';
 import videosRouter from './videos.js';
 import mediaRouter from './media.js';
 import { getBranchModels as _getBranchModels } from '../../config/mongo.js';
-import { sendBookingWhatsAppNotifications } from '../../utils/whatsapp.js';
+import { sendBookingWhatsAppNotifications, sendWhatsAppCampaign } from '../../utils/whatsapp.js';
 
 const router = express.Router();
 
@@ -142,5 +142,69 @@ router.get('/bookings/download', verifyAdmin, async (req, res) => {
 router.use('/gallery', galleryRouter);
 router.use('/branch-videos', videosRouter);
 router.use('/hero-images', mediaRouter);
+
+// ── WhatsApp Campaign ─────────────────────────────────────────────────────────
+router.post('/campaign/whatsapp', verifyAdmin, async (req, res) => {
+  try {
+    const { message, image, phones: customPhones } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message required' });
+
+    let phones = [];
+
+    // Use custom phones if provided by the frontend
+    if (Array.isArray(customPhones) && customPhones.length > 0) {
+      phones = customPhones;
+    } else {
+      // Fall back: collect all past customer phones
+      const allPhones = new Set();
+      for (const branchId in mongoConnections) {
+        const models = getBranchModels(branchId);
+        if (models) {
+          const bookings = await models.Booking.find({}, 'phone');
+          bookings.forEach(b => { if (b.phone) allPhones.add(b.phone); });
+        }
+      }
+      for (const branchId in branchDbs) {
+        (branchDbs[branchId].bookings || []).forEach(b => { if (b.phone) allPhones.add(b.phone); });
+      }
+      phones = Array.from(allPhones);
+    }
+
+    const result = await sendWhatsAppCampaign({ message, image, phones });
+    res.json(result);
+  } catch (err) {
+    console.error('WhatsApp campaign error:', err);
+    res.status(500).json({ error: 'Failed to send campaign', details: err.message });
+  }
+});
+
+// ── Users list ────────────────────────────────────────────────────────────────
+router.get('/users', verifyAdmin, async (req, res) => {
+  try {
+    const usersMap = new Map();
+    for (const branchId in mongoConnections) {
+      const models = getBranchModels(branchId);
+      if (models) {
+        const bookings = await models.Booking.find({}, 'name phone createdAt');
+        bookings.forEach(b => {
+          if (b.phone && !usersMap.has(b.phone)) {
+            usersMap.set(b.phone, { name: b.name, phone: b.phone, firstBooking: b.createdAt });
+          }
+        });
+      }
+    }
+    for (const branchId in branchDbs) {
+      (branchDbs[branchId].bookings || []).forEach(b => {
+        if (b.phone && !usersMap.has(b.phone)) {
+          usersMap.set(b.phone, { name: b.name, phone: b.phone, firstBooking: b.createdAt || b.date });
+        }
+      });
+    }
+    res.json(Array.from(usersMap.values()));
+  } catch (err) {
+    console.error('Fetch users error:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
 
 export default router;

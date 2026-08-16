@@ -347,14 +347,14 @@ export const api = {
     return res.json();
   },
 
-  async sendWhatsAppCampaign(token: string, message: string, image?: string): Promise<{ success: boolean; count: number; error?: string }> {
+  async sendWhatsAppCampaign(token: string, message: string, image?: string, phones?: string[]): Promise<{ success: boolean; count: number; error?: string }> {
     const res = await fetch(`${API_BASE}/admin/campaign/whatsapp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ message, image }),
+      body: JSON.stringify({ message, image, phones }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

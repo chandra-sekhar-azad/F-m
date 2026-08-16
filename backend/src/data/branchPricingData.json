@@ -1,318 +1,252 @@
 {
   "branch-1": {
-    "name": "Friends & Memories - Eluru",
-    "address": "Sri Ambica Heights, Dr. Jagan Mohan Rao st,Beside Navayuga Fast Foods,Near Fire Station,Eluru 534006",
-    "phone": "+91 76800 06662",
-    "mapLink": "https://maps.app.goo.gl/7oyW9cQGTGrTsM2Z8",
     "halls": [],
     "cakes": [
       {
         "id": "cake-1",
-        "name": "Chocolate cake",
-        "price": 798,
+        "name": "Classic Chocolate Truffle",
+        "price": 799,
         "description": "Rich dark chocolate layers",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1775220656/f-m-elr/cakes/kqdvuagjcqysoez6roga.jpg",
-        "branch": "branch-1",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 600
-          },
-          {
-            "quantity": "1 kg",
-            "price": 1000
-          }
-        ]
+        "quantity": "1kg"
       },
       {
         "id": "cake-2",
-        "name": "Red Velvet ",
+        "name": "Red Velvet Dream",
         "price": 899,
         "description": "Cream cheese frosted perfection",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777063681/f-m-elr/cakes/vnk0gk7nygyzr8olnfm7.jpg",
-        "branch": "branch-1",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 700
-          },
-          {
-            "quantity": "1kg",
-            "price": 1400
-          }
-        ]
+        "quantity": "1kg"
       },
       {
         "id": "cake-3",
-        "name": "Butterscotch ",
+        "name": "Butterscotch Crunch",
         "price": 749,
         "description": "Caramel & crunchy butterscotch",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777123301/f-m-elr/cakes/fk0w5dubzylzrw9snhhg.jpg",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 500
-          },
-          {
-            "quantity": "1 kg",
-            "price": 1000
-          }
-        ],
-        "branch": "branch-1"
+        "quantity": "1kg"
+      },
+      {
+        "id": "cake-4",
+        "name": "Fresh Fruit Delight",
+        "price": 999,
+        "description": "Seasonal fruits with cream",
+        "quantity": "1kg"
       },
       {
         "id": "cake-5",
         "name": "Black Forest Premium",
         "price": 849,
         "description": "Cherry-filled chocolate classic",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777123387/f-m-elr/cakes/dc4gici2uai6uvy3181y.jpg"
+        "quantity": "1kg"
       }
     ],
     "decorations": [
       {
+        "id": "extra-1",
+        "name": "Balloon Bouquet Setup",
+        "price": 1500,
+        "description": "100+ premium balloons"
+      },
+      {
+        "id": "extra-2",
+        "name": "LED Neon Sign",
+        "price": 800,
+        "description": "Custom message neon display"
+      },
+      {
         "id": "extra-3",
         "name": "Photo Wall / Backdrop",
+        "price": 2000,
+        "description": "Instagram-worthy backdrop"
+      },
+      {
+        "id": "extra-4",
+        "name": "Fog Machine Effect",
         "price": 500,
-        "description": "Instagram-worthy backdrop",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1776430272/f-m-elr/decorations/wvlybsukc6c7ijovrtdo.jpg",
-        "branch": "branch-1"
+        "description": "Dramatic fog entrance"
       },
       {
-        "id": "extra-6e7e9e96-9572-4d1c-aac2-c08ee3fb4e99",
-        "name": "Fog Entry",
-        "price": 1000,
-        "description": "",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777123530/f-m-elr/decorations/hlskadsqbucds7vaoge7.webp"
+        "id": "extra-5",
+        "name": "Rose Petal Pathway",
+        "price": 1200,
+        "description": "Romantic rose petal setup"
       },
       {
-        "id": "extra-40988820-5f24-4ba1-97c6-b03aa3616bcb",
-        "name": "Reel Shoot",
-        "price": 1000,
-        "description": "",
-        "image": "",
-        "video": "https://res.cloudinary.com/dzgz1epov/video/upload/v1779527464/Home/f-m-elr/decorations/k4mlolihfx5gz0buazyu.mp4",
-        "branch": "branch-1"
+        "id": "extra-6",
+        "name": "Confetti Cannon",
+        "price": 600,
+        "description": "Party poppers & confetti"
       }
     ],
     "pricing": {
       "private-theatre-party-hall": {
-        "1": 1499,
-        "2": 2299,
-        "3": 2999,
-        "4": 4000
+        "1": {
+          "price": 1500,
+          "offerPrice": 1300
+        },
+        "2": {
+          "price": 2500,
+          "offerPrice": 2000
+        },
+        "3": {
+          "price": 5000,
+          "offerPrice": 3999
+        },
+        "4": {
+          "price": 6500,
+          "offerPrice": 5499
+        }
       },
       "premium-pack": {
         "1": {
-          "price": 3699,
-          "offerPrice": 3499
+          "price": 4500,
+          "offerPrice": 3999
         },
         "2": {
-          "price": 4499,
-          "offerPrice": 4299
-        },
-        "3": {
-          "price": 5499,
+          "price": 5500,
           "offerPrice": 4999
         },
-        "4": {
-          "price": 6399,
+        "3": {
+          "price": 7500,
           "offerPrice": 5999
+        },
+        "4": {
+          "price": 9000,
+          "offerPrice": 7499
         }
       }
     },
-    "decorationPrice": 0,
-    "testimonials": [
-      {
-        "id": "testimonial-d4d3d2aa-7efd-4062-9fe3-f7f560953eef",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777236487/f-m-elr/testimonials/txaoi7pkq5rzlhd4yylp.jpg",
-        "title": "Customer Memory",
-        "date": "4/26/2026"
-      },
-      {
-        "id": "testimonial-0f92c3a3-530a-4234-a8f0-8a730d1c4806",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777236503/f-m-elr/testimonials/rf5r0glpndrktx8jmisl.jpg",
-        "title": "Customer Memory",
-        "date": "4/26/2026"
-      },
-      {
-        "id": "testimonial-42460b28-7383-460f-8468-37f483faf709",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777236554/f-m-elr/testimonials/pqccpz9dirlhbhkvnbxq.jpg",
-        "title": "Customer Memory",
-        "date": "4/26/2026"
-      }
-    ],
-    "heroImages": [
-      "https://res.cloudinary.com/dzgz1epov/image/upload/v1777236306/f-m-elr/hero/hb2op51v9zwi2totmpgu.jpg",
-      "https://res.cloudinary.com/dzgz1epov/image/upload/v1777236328/f-m-elr/hero/ybmaddlskhukxjedei87.jpg",
-      "https://res.cloudinary.com/dzgz1epov/image/upload/v1777236338/f-m-elr/hero/a65po2a4ezadsm5ioaow.jpg"
-    ],
-    "branchVideos": [
-      {
-        "id": "video-1cc69eba-607c-4902-8887-53d2c15360d1",
-        "url": "https://res.cloudinary.com/dzgz1epov/video/upload/v1779524394/Home/f-m-elr/videos/ouo6vopmpckhwqy19tfx.mp4",
-        "title": "Branch Video",
-        "publicId": "Home/f-m-elr/videos/ouo6vopmpckhwqy19tfx"
-      }
-    ],
+    "decorationPrice": 1500,
+    "testimonials": [],
+    "heroImages": [],
+    "branchVideos": [],
     "galleryVideos": [],
     "socialLinks": {
-      "instagram": "https://www.instagram.com/friendsandmemories_eluru?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+      "instagram": "https://instagram.com/friends_and_memories_elr",
       "facebook": "https://facebook.com",
-      "whatsapp": "7680006662"
+      "whatsapp": ""
     },
     "bookingsEnabled": true
   },
   "branch-2": {
-    "name": "Friends & Memories - Bhimavaram",
-    "address": "4-Masid St, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
-    "phone": "+91 99127 10932",
-    "mapLink": "https://maps.app.goo.gl/hc31fqJaDx6Veqkv7",
-    "halls": [
-      {
-        "id": "hall-1",
-        "name": "Hall 1"
-      },
-      {
-        "id": "hall-2",
-        "name": "Hall 2"
-      }
-    ],
+    "halls": [],
     "cakes": [
       {
         "id": "cake-1",
-        "name": "Butterscotch",
+        "name": "Classic Chocolate Truffle",
         "price": 799,
         "description": "Rich dark chocolate layers",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 500
-          },
-          {
-            "quantity": "1kg",
-            "price": 1000
-          }
-        ],
-        "branch": "branch-2",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777120703/f-m-bvrm/cakes/gxc6e6adx4yqjxrdk2hw.jpg"
+        "quantity": "1kg"
       },
       {
         "id": "cake-2",
-        "name": "Red Velvet ",
+        "name": "Red Velvet Dream",
         "price": 899,
         "description": "Cream cheese frosted perfection",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777121596/f-m-bvrm/cakes/dmwua8psw6j0yvwmvtvc.jpg",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 700
-          },
-          {
-            "quantity": "1 kg",
-            "price": 1400
-          }
-        ],
-        "branch": "branch-2"
+        "quantity": "1kg"
+      },
+      {
+        "id": "cake-3",
+        "name": "Butterscotch Crunch",
+        "price": 749,
+        "description": "Caramel & crunchy butterscotch",
+        "quantity": "1kg"
       },
       {
         "id": "cake-4",
-        "name": "Chocolate ",
+        "name": "Fresh Fruit Delight",
         "price": 999,
         "description": "Seasonal fruits with cream",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777122232/f-m-bvrm/cakes/i6qs2noyedxjwwag1pzw.jpg",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 600
-          },
-          {
-            "quantity": "1kg ",
-            "price": 1000
-          }
-        ],
-        "branch": "branch-2"
+        "quantity": "1kg"
       },
       {
         "id": "cake-5",
-        "name": "Black Forest ",
+        "name": "Black Forest Premium",
         "price": 849,
         "description": "Cherry-filled chocolate classic",
-        "variants": [
-          {
-            "quantity": "500 gm",
-            "price": 600
-          },
-          {
-            "quantity": "1 kg",
-            "price": 1000
-          }
-        ],
-        "branch": "branch-2",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777122369/f-m-bvrm/cakes/wdvshwzxsigy8553rpzw.jpg"
+        "quantity": "1kg"
       }
     ],
     "decorations": [
       {
+        "id": "extra-1",
+        "name": "Balloon Bouquet Setup",
+        "price": 1500,
+        "description": "100+ premium balloons"
+      },
+      {
+        "id": "extra-2",
+        "name": "LED Neon Sign",
+        "price": 800,
+        "description": "Custom message neon display"
+      },
+      {
         "id": "extra-3",
-        "name": "Photo Wall ",
-        "price": 500,
-        "description": "Instagram-worthy backdrop",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1776431974/f-m-bvrm/decorations/xktrgk6v4pco13eo6n6i.jpg",
-        "branch": "branch-2"
+        "name": "Photo Wall / Backdrop",
+        "price": 2000,
+        "description": "Instagram-worthy backdrop"
       },
       {
         "id": "extra-4",
-        "name": "Fog Entry",
-        "price": 1000,
-        "description": "Dramatic fog entrance",
-        "branch": "branch-2",
-        "image": "https://res.cloudinary.com/dzgz1epov/image/upload/v1777122532/f-m-bvrm/decorations/egrqnncyia6k8km6cvyn.webp"
+        "name": "Fog Machine Effect",
+        "price": 500,
+        "description": "Dramatic fog entrance"
+      },
+      {
+        "id": "extra-5",
+        "name": "Rose Petal Pathway",
+        "price": 1200,
+        "description": "Romantic rose petal setup"
+      },
+      {
+        "id": "extra-6",
+        "name": "Confetti Cannon",
+        "price": 600,
+        "description": "Party poppers & confetti"
       }
     ],
     "pricing": {
       "private-theatre-party-hall": {
         "1": {
-          "price": 1799,
-          "offerPrice": 1499
+          "price": 1500,
+          "offerPrice": 1300
         },
         "2": {
-          "price": 2699,
-          "offerPrice": 2499
+          "price": 2500,
+          "offerPrice": 2000
         },
         "3": {
-          "price": 3499,
-          "offerPrice": 2999
+          "price": 5000,
+          "offerPrice": 3999
         },
         "4": {
-          "price": 3999,
-          "offerPrice": 4399
+          "price": 6500,
+          "offerPrice": 5499
         }
       },
       "premium-pack": {
         "1": {
-          "price": 3499,
-          "offerPrice": 2799
-        },
-        "2": {
-          "price": 4499,
-          "offerPrice": 3599
-        },
-        "3": {
-          "price": 4999,
+          "price": 4500,
           "offerPrice": 3999
         },
-        "4": {
-          "price": 5999,
+        "2": {
+          "price": 5500,
           "offerPrice": 4999
+        },
+        "3": {
+          "price": 7500,
+          "offerPrice": 5999
+        },
+        "4": {
+          "price": 9000,
+          "offerPrice": 7499
         }
       }
     },
-    "decorationPrice": 0,
+    "decorationPrice": 1500,
     "testimonials": [],
     "heroImages": [],
     "branchVideos": [
       {
-        "id": "video-0ac00207-cfdb-4e16-a12b-22a4c755da5c",
+        "id": "cloudinary-Home/f-m-bvrm/videos/hayuvrngpbegbd9yyqcw",
         "url": "https://res.cloudinary.com/dzgz1epov/video/upload/v1779525955/Home/f-m-bvrm/videos/hayuvrngpbegbd9yyqcw.mp4",
         "title": "Branch Video",
         "publicId": "Home/f-m-bvrm/videos/hayuvrngpbegbd9yyqcw"
@@ -320,10 +254,10 @@
     ],
     "galleryVideos": [],
     "socialLinks": {
-      "instagram": "https://www.instagram.com/friendsandmemories_theatre?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+      "instagram": "https://instagram.com/friends_and_memories_elr",
       "facebook": "https://facebook.com",
-      "whatsapp": "9912710932"
+      "whatsapp": ""
     },
-    "bookingsEnabled": false
+    "bookingsEnabled": true
   }
 }

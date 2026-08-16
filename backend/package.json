@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Backend for Friends & Memories booking system",
   "type": "module",
-  "main": "src/index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "node --watch src/index.js",
     "build": "echo 'Frontend is pre-built into backend/public — no build step needed'",
@@ -30,7 +30,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.0",
     "twilio": "^5.13.1",
-    "uuid": "^9.0.0",
+    "uuid": "^14.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

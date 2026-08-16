@@ -4,7 +4,12 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import useEmblaCarousel from "embla-carousel-react";
 
-const ReviewSection = () => {
+interface ReviewSectionProps {
+  showForm?: boolean;
+  showReviews?: boolean;
+}
+
+const ReviewSection = ({ showForm = true, showReviews = true }: ReviewSectionProps) => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -14,7 +19,7 @@ const ReviewSection = () => {
     comment: ""
   });
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "start",
     skipSnaps: false
@@ -46,7 +51,7 @@ const ReviewSection = () => {
   // Automatic scrolling logic
   useEffect(() => {
     if (!emblaApi || reviews.length <= 1) return;
-    
+
     const intervalId = setInterval(() => {
       emblaApi.scrollNext();
     }, 5000); // Scroll every 5 seconds
@@ -80,10 +85,10 @@ const ReviewSection = () => {
       {/* Dynamic Background Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 animate-pulse" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 animate-pulse" />
-      
+
       {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, gray 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, gray 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-20">
@@ -100,7 +105,8 @@ const ReviewSection = () => {
 
         <div className="grid lg:grid-cols-5 gap-12 items-start">
           {/* Review Carousel Column */}
-          <div className="lg:col-span-3">
+          {showReviews && (
+          <div className={`-ml-4 sm:ml-0 pr-6 sm:pr-0 ${showForm ? 'lg:col-span-3' : 'lg:col-span-5'}`}>
             {reviews.length > 0 ? (
               <div className="relative">
                 <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
@@ -110,14 +116,14 @@ const ReviewSection = () => {
                         <div className="bg-[#141414] border border-white/5 p-6 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden group min-h-[320px] flex flex-col">
                           {/* Inner glow */}
                           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                          
+
                           <Quote className="absolute top-8 right-8 h-12 w-12 text-primary/10" />
-                          
+
                           <div className="flex gap-1.5 mb-8 relative z-10">
                             {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`h-5 w-5 ${i < review.rating ? "fill-primary text-primary" : "text-white/10"}`} 
+                              <Star
+                                key={i}
+                                className={`h-5 w-5 ${i < review.rating ? "fill-primary text-primary" : "text-white/10"}`}
                               />
                             ))}
                           </div>
@@ -150,14 +156,14 @@ const ReviewSection = () => {
 
                 {reviews.length > 1 && (
                   <div className="flex gap-4 mt-10 justify-center lg:justify-start">
-                    <button 
+                    <button
                       onClick={scrollPrev}
                       aria-label="Previous review"
                       className="group p-4 rounded-full border border-white/5 bg-white/5 text-white hover:border-primary/50 transition-all hover:bg-primary/10"
                     >
                       <ChevronLeft className="h-6 w-6 group-hover:-translate-x-1 transition-transform" />
                     </button>
-                    <button 
+                    <button
                       onClick={scrollNext}
                       aria-label="Next review"
                       className="group p-4 rounded-full border border-white/5 bg-white/5 text-white hover:border-primary/50 transition-all hover:bg-primary/10"
@@ -174,13 +180,15 @@ const ReviewSection = () => {
               </div>
             )}
           </div>
+          )}
 
           {/* Form Column */}
-          <div className="mr-2 sm:mr-0 lg:col-span-2">
+          {showForm && (
+          <div className={`pr-6 sm:pr-0 ${showReviews ? 'lg:col-span-2' : 'lg:col-span-5 max-w-2xl mx-auto w-full'}`}>
             <div className="bg-[#141414] border border-white/5 p-6 md:p-8 rounded-3xl shadow-2xl relative">
               <h3 className="text-xl font-bold text-white mb-1 font-display">Leave a Review</h3>
               <p className="text-muted-foreground text-xs mb-6 font-body">Tell us about your visit to F&M</p>
-              
+
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 font-body">Guest Name</label>
@@ -208,8 +216,8 @@ const ReviewSection = () => {
                         aria-label={`Rate ${star} stars`}
                         className="transition-all hover:scale-110 active:scale-90"
                       >
-                        <Star 
-                          className={`h-6 w-6 transition-colors ${star <= formData.rating ? "fill-primary text-primary" : "text-white/10"}`} 
+                        <Star
+                          className={`h-6 w-6 transition-colors ${star <= formData.rating ? "fill-primary text-primary" : "text-white/10"}`}
                         />
                       </button>
                     ))}
@@ -247,6 +255,7 @@ const ReviewSection = () => {
               </form>
             </div>
           </div>
+          )}
         </div>
       </div>
     </section>

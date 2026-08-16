@@ -418,7 +418,7 @@ const Index = () => {
         </div>
       </section>
 
-      <ReviewSection />
+      <ReviewSection showForm={false} />
 
       {/* Footer */}
       <footer className="border-t border-border py-8 bg-card/50">

@@ -1058,7 +1058,16 @@ const BookingPage = () => {
                       {paymentLoading ? "Connecting..." : `Pay ₹${advanceAmount.toLocaleString()} Now`}
                     </button>
 
-                    {/* Dev test payment buttons removed */}
+                    {/* Dev-only mock payment button — hidden in production builds */}
+                    {import.meta.env.DEV && (
+                      <button
+                        onClick={() => handlePayment('mock')}
+                        disabled={paymentLoading}
+                        className="w-full rounded-xl border-2 border-dashed border-yellow-400 bg-yellow-50 py-3 text-sm font-bold text-yellow-800 transition-all hover:bg-yellow-100 disabled:opacity-50 font-body"
+                      >
+                        {paymentLoading ? "Processing..." : `[DEV] Mock Pay ₹${advanceAmount.toLocaleString()}`}
+                      </button>
+                    )}
 
                     <button
                       onClick={() => {

@@ -26,6 +26,7 @@ const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Review = lazy(() => import("./pages/Review"));
+const UserReviews = lazy(() => import("./pages/User-reviews"));
 
 import { API_BASE } from "@/lib/api";
 
@@ -68,6 +69,7 @@ const AppShell = () => {
           <Route path="/shipping-delivery" element={<ShippingPolicy />} />
           <Route path="/maintenance" element={<Navigate to="/" replace />} />
           <Route path="/review" element={<Review />} />
+          <Route path="/user-reviews" element={<UserReviews />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

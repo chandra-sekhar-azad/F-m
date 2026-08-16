@@ -599,4 +599,78 @@ router.get('/bookings/download', verifyAdmin, async (req, res) => {
   }
 });
 
+// WhatsApp Campaign (Admin)
+router.post('/campaign/whatsapp', verifyAdmin, async (req, res) => {
+  try {
+    const { message, image } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message required' });
+
+    // Extract phones
+    const allPhones = new Set();
+    
+    // fetch from mongo
+    for (const branchId in mongoConnections) {
+      const models = getBranchModels(branchId);
+      if (models) {
+        const bookings = await models.Booking.find({}, 'phone');
+        bookings.forEach(b => { if (b.phone) allPhones.add(b.phone); });
+      }
+    }
+    
+    // from branchDbs fallback
+    for (const branchId in branchDbs) {
+      if (branchDbs[branchId].bookings) {
+        branchDbs[branchId].bookings.forEach(b => { if (b.phone) allPhones.add(b.phone); });
+      }
+    }
+    
+    const phones = Array.from(allPhones);
+
+    // Ensure whatsapp.js exists or will be created
+    const { sendWhatsAppCampaign } = await import('../utils/whatsapp.js');
+    const result = await sendWhatsAppCampaign({ message, image, phones });
+    res.json(result);
+  } catch (err) {
+    console.error('WhatsApp campaign error:', err);
+    res.status(500).json({ error: 'Failed to send campaign' });
+  }
+});
+
+// Fetch All Unique Users (Admin)
+router.get('/users', verifyAdmin, async (req, res) => {
+  try {
+    const usersMap = new Map();
+
+    // fetch from mongo
+    for (const branchId in mongoConnections) {
+      const models = getBranchModels(branchId);
+      if (models) {
+        const bookings = await models.Booking.find({}, 'name phone createdAt');
+        bookings.forEach(b => {
+          if (b.phone && !usersMap.has(b.phone)) {
+            usersMap.set(b.phone, { name: b.name, phone: b.phone, firstBooking: b.createdAt });
+          }
+        });
+      }
+    }
+
+    // fetch from file fallbacks
+    for (const branchId in branchDbs) {
+      if (branchDbs[branchId].bookings) {
+        branchDbs[branchId].bookings.forEach(b => {
+          if (b.phone && !usersMap.has(b.phone)) {
+            usersMap.set(b.phone, { name: b.name, phone: b.phone, firstBooking: b.createdAt || b.date });
+          }
+        });
+      }
+    }
+
+    const users = Array.from(usersMap.values());
+    res.json(users);
+  } catch (error) {
+    console.error('Fetch users error:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
 export default router;

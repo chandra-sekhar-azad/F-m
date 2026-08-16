@@ -182,3 +182,72 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
 
   await Promise.all(promises);
 };
+
+/**
+ * Send WhatsApp Campaign using ChatMitra API.
+ * Uses a marketing template (e.g., 'marketing_update').
+ */
+export const sendWhatsAppCampaign = async ({ message, image, phones }) => {
+  if (!phones || phones.length === 0) return { success: true, count: 0 };
+  
+  if (!CHATMITRA_API_URL || !CHATMITRA_API_KEY || !CHATMITRA_AUTH_TOKEN) {
+    console.warn('⚠️  ChatMitra credentials missing — skipping WhatsApp campaign.');
+    return { success: false, error: 'ChatMitra credentials missing' };
+  }
+
+  let successCount = 0;
+  for (const phone of phones) {
+    const normalizedPhone = normalizePhone(phone);
+    try {
+      const payload = {
+        recipient_mobile_number: normalizedPhone,
+        customer_name: "Customer",
+        messages: [
+          {
+            kind: 'template',
+            template: {
+              name: 'marketing_update', // Replace with the actual approved template name on ChatMitra/Meta
+              language: 'en_US',
+              components: [
+                {
+                  type: 'body',
+                  parameters: [
+                    { type: 'text', text: message }
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      };
+      
+      // If an image URL is provided, append it to the template header
+      if (image) {
+        payload.messages[0].template.components.push({
+          type: 'header',
+          parameters: [
+            { type: 'image', image: { link: image } }
+          ]
+        });
+      }
+
+      console.log(`📲 Sending campaign to ${normalizedPhone}`);
+      const response = await fetch(CHATMITRA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${CHATMITRA_API_KEY}:${CHATMITRA_AUTH_TOKEN.trim()}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        successCount++;
+      }
+    } catch (err) {
+      console.error(`Failed campaign to ${phone}:`, err.message);
+    }
+  }
+
+  return { success: true, count: successCount };
+};

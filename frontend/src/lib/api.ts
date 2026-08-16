@@ -345,6 +345,30 @@ export const api = {
     return res.json();
   },
 
+  async sendWhatsAppCampaign(token: string, message: string, image?: string): Promise<{ success: boolean; count: number; error?: string }> {
+    const res = await fetch(`${API_BASE}/admin/campaign/whatsapp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ message, image }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to send WhatsApp campaign");
+    }
+    return res.json();
+  },
+
+  async getUsers(token: string): Promise<{ name: string; phone: string; firstBooking?: string }[]> {
+    const res = await fetch(`${API_BASE}/admin/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to fetch users");
+    return res.json();
+  },
+
   async getBookings(token: string, branch?: string, status?: string, startDate?: string, endDate?: string): Promise<any[]> {
     let url = `${API_BASE}/bookings`;
     const params = new URLSearchParams();

@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 
 import { API_BASE, api } from "@/lib/api";
 import { getEffectivePrice } from "@/lib/utils";
-import { Eye, EyeOff, Clock, CheckCircle, Phone, MapPin, Calendar, LogIn, Filter, Settings, Loader, Plus, Download, Edit, Trash2, X, Play } from "lucide-react";
+import { Eye, EyeOff, Clock, CheckCircle, Phone, MapPin, Calendar, LogIn, Filter, Settings, Loader, Plus, Download, Edit, Trash2, X, Play, MessageSquare, Users } from "lucide-react";
+import AdminCampaign from "./Admin-campaign";
+import UsersDb from "./Users-db";
 
 interface Booking {
   id: string;
@@ -141,7 +143,7 @@ const AdminDashboard = () => {
   const [customDate, setCustomDate] = useState<string>("");
   const [rangeStart, setRangeStart] = useState<string>("");
   const [rangeEnd, setRangeEnd] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "pricing" | "gallery" | "videos" | "settings">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "campaigns" | "users" | "pricing" | "gallery" | "videos" | "settings">("bookings");
   const [manualBooking, setManualBooking] = useState<ManualBookingForm>({
     branch: "branch-1",
     service: "private-theatre-party-hall",
@@ -1161,6 +1163,8 @@ const AdminDashboard = () => {
           {[
             { id: "bookings", label: "Bookings", icon: Calendar },
             { id: "manual", label: "Manual Booking", icon: Plus },
+            { id: "users", label: "Users DB", icon: Users },
+            { id: "campaigns", label: "Campaigns", icon: MessageSquare },
             { id: "pricing", label: "Pricing", icon: Settings },
             { id: "gallery", label: "Gallery", icon: Eye },
             { id: "videos", label: "Home Videos", icon: Play },
@@ -1662,6 +1666,16 @@ const AdminDashboard = () => {
               </div>
             )}
           </>
+        )}
+
+        {/* Campaigns Tab */}
+        {activeTab === "campaigns" && (
+          <AdminCampaign token={token!} selectedBranch={selectedBranch} />
+        )}
+
+        {/* Users DB Tab */}
+        {activeTab === "users" && (
+          <UsersDb token={token!} />
         )}
 
         {/* Manual Booking Tab */}

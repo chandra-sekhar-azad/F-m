@@ -3,11 +3,9 @@ const allowedOrigins = [
   'http://localhost:5000',
   'http://localhost:5173',
   'http://localhost:8080',
-  'https://friendsandmemories.vercel.app',
   'https://friendsandmemories.in',
   'https://www.friendsandmemories.in',
-  'https://f-m-xk1e.onrender.com',
-  'https://f-m-8146.onrender.com'
+  'https://api.friendsandmemories.in',
 ];
 
 export const corsOptions = {

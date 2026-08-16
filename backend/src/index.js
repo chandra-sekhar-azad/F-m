@@ -1,6 +1,6 @@
+import './config/env.js'; // load env vars from root .env
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { connectToMongo, getBranchModels } from './config/mongo.js';
 import { branchDbs, globalDb } from './config/constants.js';
 import { loadBookings, loadTimeSlots } from './utils/persistence.js';
@@ -14,8 +14,6 @@ import branchRoutes from './routes/branch.js';
 import paymentRoutes from './routes/payment.js';
 
 import { corsOptions } from './middleware/cors.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

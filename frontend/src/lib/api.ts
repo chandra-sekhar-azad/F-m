@@ -1,5 +1,5 @@
 // Determine API base URL - use env var if available, otherwise use production URL
-const API_URL = import.meta.env.VITE_API_URL || 'https://f-m-xk1e.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 export const API_BASE = API_URL;
 
 export interface Branch {

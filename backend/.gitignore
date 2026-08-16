@@ -1,52 +1,53 @@
-# Dependencies
+# ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
-package-lock.json
+# Note: package-lock.json is intentionally committed for reproducible installs
 
-# Environment variables
+# ── Environment variables ─────────────────────────────────────────────────────
 .env
 .env.local
 .env.*.local
-.env.production.local
+.env.staging
 
-# Logs
+# ── Logs ──────────────────────────────────────────────────────────────────────
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Build outputs
+# ── Build outputs ─────────────────────────────────────────────────────────────
 dist/
 build/
 
-# IDE
+# ── OS files ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Testing
+# ── Testing ───────────────────────────────────────────────────────────────────
 coverage/
 .nyc_output/
 
-# Misc
-.cache/
-.turbo/
-
-# Project specific - Data files (use MongoDB in production)
+# ── Project specific ──────────────────────────────────────────────────────────
+# Local JSON data files — use MongoDB in production
 data/bookings.json
 data/timeSlots.json
-data/branchPricingData.json
-
-# Exported files
+data/bookings/
+# Exported spreadsheets
 *.xlsx
 *.xls
 *.csv
-
-# Temporary files
+# Misc
 *.tmp
 *.temp
+.cache/
+.turbo/
+
+# ── Old platform configs (deleted, keep ignored in case re-added) ─────────────
+vercel.json
+Procfile

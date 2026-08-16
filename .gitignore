@@ -1,8 +1,8 @@
-# Dependencies
+# ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
 **/node_modules/
 
-# Build outputs
+# ── Build outputs ─────────────────────────────────────────────────────────────
 dist/
 dist-ssr/
 build/
@@ -11,34 +11,28 @@ out/
 **/dist/
 **/build/
 
-# Logs
-logs
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Environment variables
+# ── Environment variables ─────────────────────────────────────────────────────
+# Root .env holds all secrets — never commit it
 .env
 .env.local
 .env.*.local
-.env.production.local
-**/.env
-**/.env.*
 .env.staging
+# Per-package env files
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.staging
 
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.suo
-*.sln
-*~
-.DS_Store
-Thumbs.db
-
-# OS files
+# ── OS files ──────────────────────────────────────────────────────────────────
 .DS_Store
 .DS_Store?
 ._*
@@ -47,20 +41,39 @@ Thumbs.db
 ehthumbs.db
 Thumbs.db
 
-# Testing
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.suo
+*.sln
+*~
+
+# ── Testing ───────────────────────────────────────────────────────────────────
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 
-# Project Specific
+# ── Project specific ──────────────────────────────────────────────────────────
+# Data files — use MongoDB in production
 backend/src/data/*.json
 !backend/src/data/globalDb.json
 backend/src/data/*.bak
+# Exported spreadsheets
 *.xlsx
 *.xls
 *.csv
+# Misc cache
 .cache/
 .turbo/
-.vercel
-
-# Postman (contains API keys)
+# Postman (may contain API keys)
 .postman.json
+
+# ── Old platform configs (deleted, keep ignored in case re-added) ─────────────
+backend/vercel.json
+backend/Procfile
+.vercel/

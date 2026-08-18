@@ -275,6 +275,12 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
     ? booking.customOccasion
     : (booking.occasion || 'Celebration');
 
+  let screenStr = '';
+  if (booking.branch === 'branch-2' && booking.hall) {
+    const screenName = booking.hall === 'prime' ? 'Prime Screen' : booking.hall === 'private' ? 'Private Screen' : booking.hall;
+    screenStr = `\n📺 *Screen:* ${screenName}`;
+  }
+
   const promises = [];
 
   // ── 1. Customer confirmation ──────────────────────────────────────────────
@@ -285,7 +291,7 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
       `📅 *Date:* ${booking.date}\n` +
       `⏰ *Time:* ${booking.timeSlot}\n` +
       `⏳ *Duration:* ${fmtDuration(booking.duration)}\n` +
-      `🎬 *Package:* ${fmtService(booking.service)}\n` +
+      `🎬 *Package:* ${fmtService(booking.service)}` + screenStr + `\n` +
       `🎊 *Occasion:* ${occasion}\n` +
       `🆔 *Booking ID:* ${booking.id}\n\n` +
       `_Friends & Memories — creating moments that last a lifetime._`;
@@ -306,7 +312,7 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
         `📞 *Phone:* ${booking.phone}\n` +
         `📅 *Date:* ${booking.date}\n` +
         `⏰ *Slot:* ${booking.timeSlot}\n` +
-        `⏳ *Duration:* ${fmtDuration(booking.duration)}\n` +
+        `⏳ *Duration:* ${fmtDuration(booking.duration)}` + screenStr + `\n` +
         `💰 *Amount:* ₹${booking.totalPrice}`;
     } else {
       adminMsg =
@@ -315,7 +321,7 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
         `📞 *Phone:* ${booking.phone}\n` +
         `📅 *Date:* ${booking.date}\n` +
         `⏰ *Slot:* ${booking.timeSlot}\n` +
-        `⏳ *Duration:* ${fmtDuration(booking.duration)}\n` +
+        `⏳ *Duration:* ${fmtDuration(booking.duration)}` + screenStr + `\n` +
         `🎁 *Add-ons:* ${fmtAddons(booking)}\n` +
         `🎊 *Occasion:* ${occasion}\n` +
         `💰 *Amount:* ₹${booking.totalPrice}`;

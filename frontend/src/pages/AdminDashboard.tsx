@@ -26,6 +26,7 @@ interface Booking {
   notes?: string;
   membersCount?: number;
   extraPersonsCharge?: number;
+  hall?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -1135,7 +1136,7 @@ const AdminDashboard = () => {
       (filter === "paid" && (b.paymentStatus === "paid" || b.paymentStatus === "partially-paid")) ||
       b.paymentStatus === filter
     )
-  );
+  ).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -1456,6 +1457,14 @@ const AdminDashboard = () => {
                           <p className="text-xs text-muted-foreground">Service</p>
                           <p className="font-semibold text-foreground capitalize">{selectedBooking.service.replace('-', ' ')}</p>
                         </div>
+                        {selectedBooking.hall && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Screen</p>
+                            <p className="font-semibold text-foreground capitalize">
+                              {selectedBooking.hall === 'prime' ? 'Prime Screen' : selectedBooking.hall === 'private' ? 'Private Screen' : selectedBooking.hall}
+                            </p>
+                          </div>
+                        )}
                         <div>
                           <p className="text-xs text-muted-foreground">Date</p>
                           <p className="font-semibold text-foreground">{selectedBooking.date}</p>

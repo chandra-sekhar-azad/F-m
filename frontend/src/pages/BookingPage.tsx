@@ -704,7 +704,7 @@ const BookingPage = () => {
                   {/* Hall selector — only shown when selected branch has multiple halls */}
                   {halls.length > 0 && (
                     <div>
-                      <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Hall</label>
+                      <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Screen</label>
                       <div className="grid gap-3 grid-cols-2">
                         {halls.map((hall) => (
                           <button
@@ -716,10 +716,7 @@ const BookingPage = () => {
                                 : "border-border hover:border-primary hover:shadow-md"
                             }`}
                           >
-                            <div className={`p-2 rounded-lg ${booking.hall === hall.id ? "bg-primary/20" : "bg-muted"}`}>
-                              <Film className={`h-5 w-5 ${booking.hall === hall.id ? "text-primary" : "text-muted-foreground"}`} />
-                            </div>
-                            <div>
+                            <div className="flex-1 text-center">
                               <p className="font-bold text-foreground text-sm font-body">{hall.name}</p>
                               {booking.hall === hall.id && (
                                 <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Selected ✓</span>

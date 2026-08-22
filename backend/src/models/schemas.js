@@ -58,6 +58,7 @@ export const bookingSchema = new mongoose.Schema({
   paymentType: String, // 'full' or 'advance'
   paymentMode: String, // 'razorpay' | 'manual' | 'mock' etc.
   amountPaid: { type: Number, default: 0 },
+  reviewRequested: { type: Boolean, default: false }
   balanceAmount: { type: Number, default: 0 },
   notes: String,
   createdAt: Date,

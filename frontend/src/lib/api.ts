@@ -660,16 +660,13 @@ export const api = {
     return normalizeBranchVideos(await res.json());
   },
 
-  async toggleBranchBookings(token: string, branch: string, enabled: boolean): Promise<void> {
-    const res = await fetch(`${API_BASE}/branches/${branch}/bookings-toggle`, {
+  async toggleBranchBookings(token: string, branch: string, enabled: boolean, hallId?: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/branches/${encodeURIComponent(branch)}/bookings-toggle`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ bookingsEnabled: enabled }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ bookingsEnabled: enabled, hallId }),
     });
-    if (!res.ok) throw new Error("Failed to toggle branch bookings");
+    if (!res.ok) throw new Error("Failed to toggle bookings");
   },
 
   // ── Chunked step loaders ──────────────────────────────────────────────────

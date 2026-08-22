@@ -25,6 +25,15 @@ export const createBooking = async (req, res) => {
     return res.status(403).json({ error: 'Bookings are currently paused for this branch. Please try again later.' });
   }
 
+  // Check if bookings are enabled for this specific hall
+  if (req.body.hall && catalog && catalog.halls) {
+    const hallObj = catalog.halls.find(h => h.id === req.body.hall);
+    if (hallObj && hallObj.bookingsEnabled === false) {
+      console.warn(`⛔ Bookings are disabled for branch: ${branch}, hall: ${req.body.hall}`);
+      return res.status(403).json({ error: 'Bookings are currently paused for this screen. Please try again later.' });
+    }
+  }
+
   // Block bookings for past dates — admin manual bookings are exempt
   const today = new Date().toISOString().split('T')[0];
   if (req.body.date < today && !req.body.isAdminBooking) {
@@ -459,10 +468,27 @@ export const getAvailability = async (req, res) => {
   
   if (!branchDb && !models) return res.status(404).json({ error: 'Branch not found' });
 
+  // Calculate today's date and time in IST
+  const now = new Date();
+  const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const todayStr = `${istTime.getFullYear()}-${String(istTime.getMonth() + 1).padStart(2, '0')}-${String(istTime.getDate()).padStart(2, '0')}`;
+  
   // Block availability checks for past dates — skip for admin
-  const todayStr = new Date().toISOString().split('T')[0];
   if (date < todayStr && req.query.admin !== 'true') {
     return res.status(400).json({ availableSlots: [], bookedSlots: [], error: 'Date is in the past' });
+  }
+
+  // Check if bookings are enabled for this branch or hall
+  const catalog = await getCatalogForBranch(branchId).catch(() => null);
+  if (catalog && catalog.bookingsEnabled === false) {
+    return res.status(400).json({ availableSlots: [], bookedSlots: [], error: 'Bookings are currently paused for this branch. Please try again later.' });
+  }
+
+  if (hall && catalog && catalog.halls) {
+    const hallObj = catalog.halls.find(h => h.id === hall);
+    if (hallObj && hallObj.bookingsEnabled === false) {
+      return res.status(400).json({ availableSlots: [], bookedSlots: [], error: 'Bookings are currently paused for this screen. Please try again later.' });
+    }
   }
   
   try {
@@ -490,11 +516,9 @@ export const getAvailability = async (req, res) => {
     
     console.log(`✅ Available slots: ${availableSlots.length}, Blocked slots: ${bookedSlotsList.length}`);
     
-    const today = new Date().toISOString().split('T')[0];
     let filteredAvailable = availableSlots;
-    if (date === today) {
-      const now = new Date();
-      const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+    if (date === todayStr) {
+      const currentTimeMinutes = istTime.getHours() * 60 + istTime.getMinutes();
       filteredAvailable = availableSlots.filter(slot => {
         const slotMinutes = parse12HourTime(slot);
         return slotMinutes > currentTimeMinutes + 60;

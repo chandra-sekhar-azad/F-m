@@ -15,6 +15,7 @@ interface PricingItem {
   image?: string;
   service?: string;
   duration?: number;
+  hallId?: string;
 }
 
 const AdminPricing = () => {
@@ -149,11 +150,11 @@ const AdminPricing = () => {
     }
   };
 
-  const handleEditService = (service: string, duration: number, price: any) => {
-    setEditingId(`${service}-${duration}`);
+  const handleEditService = (service: string, duration: number, price: any, hallId?: string) => {
+    setEditingId(hallId ? `${service}-${hallId}-${duration}` : `${service}-${duration}`);
     const actualPrice = typeof price === 'object' ? (price.price || 0) : price;
     const offerPrice = typeof price === 'object' ? price.offerPrice : undefined;
-    setEditValues({ service, duration, price: actualPrice, offerPrice });
+    setEditValues({ service, duration, price: actualPrice, offerPrice, hallId } as PricingItem);
   };
 
   const handleEditCake = (cake: PricingItem) => {
@@ -376,87 +377,114 @@ const AdminPricing = () => {
         {/* Services Tab */}
         {activeTab === "services" && (
           <div className="space-y-4">
-            {Object.entries(pricing).map(([service, durations]) => (
-              <div key={service} className="border border-border rounded-lg p-6">
-                <h3 className="font-semibold text-lg mb-4 capitalize">{service.replace("-", " ")}</h3>
-                <div className="space-y-3">
-                  {[1, 2, 3, 4].map((duration) => {
-                    const price = (durations as any)[duration] || (durations as any)[String(duration)] || 0;
-                    const isEditing = editingId === `${service}-${duration}`;
-                    return (
-                      <div key={`${service}-${duration}`} className="flex items-center justify-between bg-muted p-3 rounded-lg">
-                        <span className="font-medium">{duration} Hour{duration !== 1 ? "s" : ""}</span>
-                        {isEditing ? (
-                          <div className="flex flex-col flex-1 gap-2">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div>
-                                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Original</label>
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs">₹</span>
-                                  <input
-                                    type="number"
-                                    value={editValues.originalPrice || ""}
-                                    onChange={(e) => setEditValues({ ...editValues, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                    className="flex-1 px-2 py-1 text-xs border border-border rounded bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                  />
+            {Object.entries(pricing).map(([service, durationsOrHalls]) => {
+              let branchHalls = [];
+              if (selectedBranch === "branch-2") {
+                branchHalls = [
+                  { id: "prime", name: "Prime Screen" },
+                  { id: "private", name: "Private Screen" }
+                ];
+              }
+              const hasHalls = branchHalls.length > 0;
+              
+              const renderDurations = (durations: any, hallId?: string, hallName?: string) => (
+                <div key={`${service}${hallId ? `-${hallId}` : ''}`} className="border border-border rounded-lg p-6 mb-4">
+                  <h3 className="font-semibold text-lg mb-4 capitalize">
+                    {service.replace("-", " ")} {hallName ? `- ${hallName}` : ''}
+                  </h3>
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((duration) => {
+                      const price = durations[duration] || durations[String(duration)] || 0;
+                      const editKey = hallId ? `${service}-${hallId}-${duration}` : `${service}-${duration}`;
+                      const isEditing = editingId === editKey;
+                      return (
+                        <div key={editKey} className="flex items-center justify-between bg-muted p-3 rounded-lg">
+                          <span className="font-medium">{duration} Hour{duration !== 1 ? "s" : ""}</span>
+                          {isEditing ? (
+                            <div className="flex flex-col flex-1 gap-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Original</label>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs">₹</span>
+                                    <input
+                                      type="number"
+                                      value={editValues.originalPrice || ""}
+                                      onChange={(e) => setEditValues({ ...editValues, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                      className="flex-1 px-2 py-1 text-xs border border-border rounded bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-semibold text-green-600 mb-1 block">🎉 Offer</label>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs text-green-600 font-bold">₹</span>
+                                    <input
+                                      type="number"
+                                      value={editValues.offerPrice || ""}
+                                      onChange={(e) => setEditValues({ ...editValues, offerPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                      className="flex-1 px-2 py-1 text-xs border-2 border-green-500 rounded bg-card text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 font-semibold"
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                              <div>
-                                <label className="text-xs font-semibold text-green-600 mb-1 block">🎉 Offer</label>
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs text-green-600 font-bold">₹</span>
-                                  <input
-                                    type="number"
-                                    value={editValues.offerPrice || ""}
-                                    onChange={(e) => setEditValues({ ...editValues, offerPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                    className="flex-1 px-2 py-1 text-xs border-2 border-green-500 rounded bg-card text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 font-semibold"
-                                  />
-                                </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  onClick={handleSaveService}
+                                  className="bg-primary text-primary-foreground text-xs"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setEditingId(null)}
+                                  className="text-xs"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
                               </div>
                             </div>
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                onClick={handleSaveService}
-                                className="bg-primary text-primary-foreground text-xs"
-                              >
-                                <Save className="h-3 w-3" />
-                              </Button>
+                          ) : (
+                            <div className="flex items-center gap-4">
+                              {typeof price === 'object' && price.offerPrice ? (
+                                <>
+                                  <span className="font-bold text-green-500">₹{price.offerPrice}</span>
+                                  <span className="text-sm line-through text-muted-foreground">₹{price.originalPrice || price.price}</span>
+                                </>
+                              ) : (
+                                <span className="font-bold text-primary">₹{typeof price === 'object' ? price.price : price}</span>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setEditingId(null)}
-                                className="text-xs"
+                                onClick={() => handleEditService(service, Number(duration), price, hallId)}
                               >
-                                <X className="h-3 w-3" />
+                                <Edit2 className="h-4 w-4" />
                               </Button>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-4">
-                            {typeof price === 'object' && price.offerPrice ? (
-                              <>
-                                <span className="font-bold text-green-500">₹{price.offerPrice}</span>
-                                <span className="text-sm line-through text-muted-foreground">₹{price.originalPrice || price.price}</span>
-                              </>
-                            ) : (
-                              <span className="font-bold text-primary">₹{typeof price === 'object' ? price.price : price}</span>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditService(service, Number(duration), price)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+
+              if (hasHalls) {
+                return (
+                  <div key={service}>
+                    {branchHalls.map(hall => {
+                      const hallDurations = durationsOrHalls[hall.id] || {};
+                      return renderDurations(hallDurations, hall.id, hall.name);
+                    })}
+                  </div>
+                );
+              } else {
+                return renderDurations(durationsOrHalls);
+              }
+            })}
           </div>
         )}
 

@@ -491,12 +491,25 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleToggleBookings = async (enabled: boolean) => {
+  const handleToggleBookings = async (enabled: boolean, hallId?: string) => {
     if (!token) return;
     try {
       setTogglingBookings(true);
-      await api.toggleBranchBookings(token, selectedBranch, enabled);
-      setBookingsEnabled(enabled);
+      await api.toggleBranchBookings(token, selectedBranch, enabled, hallId);
+      if (hallId) {
+        // Update local state for the specific hall
+        setBranchList(prev => prev.map(branch => {
+          if (branch.id === selectedBranch && branch.halls) {
+            return {
+              ...branch,
+              halls: branch.halls.map(h => h.id === hallId ? { ...h, bookingsEnabled: enabled } : h)
+            };
+          }
+          return branch;
+        }));
+      } else {
+        setBookingsEnabled(enabled);
+      }
     } catch (error) {
       console.error("Error toggling bookings:", error);
       setError("Failed to update bookings status");
@@ -762,11 +775,11 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditService = (service: string, duration: number, price: any) => {
-    setEditingId(`${service}-${duration}`);
+  const handleEditService = (service: string, duration: number, price: any, hallId?: string) => {
+    setEditingId(hallId ? `${service}-${hallId}-${duration}` : `${service}-${duration}`);
     const actualPrice = typeof price === 'object' ? (price.price || 0) : price;
     const offerPrice = typeof price === 'object' ? price.offerPrice : undefined;
-    setEditValues({ service, duration, price: actualPrice, offerPrice });
+    setEditValues({ service, duration, price: actualPrice, offerPrice, hallId });
   };
 
   const handleEditCake = (cake: any) => {
@@ -2098,78 +2111,105 @@ const AdminDashboard = () => {
                     Add Service
                   </button>
                 </div>
-                {Object.entries(pricing).map(([service, durations]) => (
-                  <div key={service} className="border border-border rounded-lg p-6">
-                    <h3 className="font-semibold text-lg mb-4 capitalize">{service.replace("-", " ")}</h3>
-                    <div className="space-y-3">
-                      {[1, 2, 3, 4].map((duration) => {
-                        const price = (durations as any)[duration] || (durations as any)[String(duration)] || 0;
-                        const isEditing = editingId === `${service}-${duration}`;
-                        return (
-                          <div key={`${service}-${duration}`} className="flex items-center justify-between bg-muted p-3 rounded-lg">
-                            <span className="font-medium text-xs">{duration} Hour{duration !== 1 ? "s" : ""}</span>
-                            {isEditing ? (
-                              <div className="flex flex-col flex-1 gap-2 ml-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                  <div>
-                                    <label className="text-[10px] font-bold text-muted-foreground block">Original</label>
-                                    <input
-                                      type="number"
-                                      value={editValues.price || ""}
-                                      onChange={(e) => setEditValues({ ...editValues, price: Number(e.target.value) })}
-                                      className="w-full px-2 py-1 text-xs border border-border rounded bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                                    />
+                {Object.entries(pricing).map(([service, durationsOrHalls]) => {
+                  let branchHalls = [];
+                  if (selectedBranch === "branch-2") {
+                    branchHalls = [
+                      { id: "prime", name: "Prime Screen" },
+                      { id: "private", name: "Private Screen" }
+                    ];
+                  }
+                  const hasHalls = branchHalls.length > 0;
+                  
+                  const renderDurations = (durationsData: any, hallId?: string, hallName?: string) => (
+                    <div key={`${service}${hallId ? `-${hallId}` : ''}`} className="border border-border rounded-lg p-6 mb-4">
+                      <h3 className="font-semibold text-lg mb-4 capitalize">
+                        {service.replace("-", " ")} {hallName ? `- ${hallName}` : ''}
+                      </h3>
+                      <div className="space-y-3">
+                        {[1, 2, 3, 4].map((duration) => {
+                          const price = (durationsData as any)[duration] || (durationsData as any)[String(duration)] || 0;
+                          const editKey = hallId ? `${service}-${hallId}-${duration}` : `${service}-${duration}`;
+                          const isEditing = editingId === editKey;
+                          return (
+                            <div key={editKey} className="flex items-center justify-between bg-muted p-3 rounded-lg">
+                              <span className="font-medium text-xs">{duration} Hour{duration !== 1 ? "s" : ""}</span>
+                              {isEditing ? (
+                                <div className="flex flex-col flex-1 gap-2 ml-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="text-[10px] font-bold text-muted-foreground block">Original</label>
+                                      <input
+                                        type="number"
+                                        value={editValues.price || ""}
+                                        onChange={(e) => setEditValues({ ...editValues, price: Number(e.target.value) })}
+                                        className="w-full px-2 py-1 text-xs border border-border rounded bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-bold text-green-600 block">Offer</label>
+                                      <input
+                                        type="number"
+                                        placeholder="0"
+                                        value={editValues.offerPrice ?? ""}
+                                        onChange={(e) => setEditValues({ ...editValues, offerPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                        className="w-full px-2 py-1 text-xs border border-green-200 rounded bg-background text-green-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                      />
+                                    </div>
                                   </div>
-                                  <div>
-                                    <label className="text-[10px] font-bold text-green-600 block">Offer</label>
-                                    <input
-                                      type="number"
-                                      placeholder="0"
-                                      value={editValues.offerPrice ?? ""}
-                                      onChange={(e) => setEditValues({ ...editValues, offerPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                      className="w-full px-2 py-1 text-xs border border-green-200 rounded bg-background text-green-600 focus:outline-none focus:ring-1 focus:ring-green-500"
-                                    />
+                                  <div className="flex gap-1 justify-end">
+                                    <button
+                                      onClick={handleSaveService}
+                                      className="px-3 py-1 bg-primary text-primary-foreground rounded text-[10px] font-bold"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingId(null)}
+                                      className="px-3 py-1 border border-border rounded text-[10px]"
+                                    >
+                                      Cancel
+                                    </button>
                                   </div>
                                 </div>
-                                <div className="flex gap-1 justify-end">
+                              ) : (
+                                <div className="flex items-center gap-3">
+                                  {typeof price === 'object' && price.offerPrice ? (
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-bold text-green-600">₹{price.offerPrice}</span>
+                                      <span className="text-[10px] line-through text-muted-foreground">₹{price.price}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="font-bold text-primary">₹{typeof price === 'object' ? price.price : price}</span>
+                                  )}
                                   <button
-                                    onClick={handleSaveService}
-                                    className="px-3 py-1 bg-primary text-primary-foreground rounded text-[10px] font-bold"
+                                    onClick={() => handleEditService(service, Number(duration), price, hallId)}
+                                    className="px-2 py-1 border border-border rounded text-[10px] hover:border-primary transition-colors"
                                   >
-                                    Save
-                                  </button>
-                                  <button
-                                    onClick={() => setEditingId(null)}
-                                    className="px-3 py-1 border border-border rounded text-[10px]"
-                                  >
-                                    Cancel
+                                    Edit
                                   </button>
                                 </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-3">
-                                {typeof price === 'object' && price.offerPrice ? (
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-bold text-green-600">₹{price.offerPrice}</span>
-                                    <span className="text-[10px] line-through text-muted-foreground">₹{price.price}</span>
-                                  </div>
-                                ) : (
-                                  <span className="font-bold text-primary">₹{typeof price === 'object' ? price.price : price}</span>
-                                )}
-                                <button
-                                  onClick={() => handleEditService(service, Number(duration), price)}
-                                  className="px-2 py-1 border border-border rounded text-[10px] hover:border-primary transition-colors"
-                                >
-                                  Edit
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+
+                  if (hasHalls) {
+                    return (
+                      <div key={service}>
+                        {branchHalls.map(hall => {
+                          const hallDurations = (durationsOrHalls as any)[hall.id] || {};
+                          return renderDurations(hallDurations, hall.id, hall.name);
+                        })}
+                      </div>
+                    );
+                  } else {
+                    return renderDurations(durationsOrHalls);
+                  }
+                })}
               </div>
             )}
 
@@ -2875,11 +2915,11 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h3 className="font-display text-lg font-bold text-foreground">
-                    Bookings — {bookingsEnabled ? "🟢 Open" : "🔴 Paused"}
+                    Master Branch Bookings — {bookingsEnabled ? "🟢 Open" : "🔴 Paused"}
                   </h3>
                   <p className="text-sm text-muted-foreground font-body mt-1">
                     {bookingsEnabled
-                      ? "Customers can currently book this branch. Toggle off to stop new bookings."
+                      ? "Customers can currently book this branch. Toggle off to stop new bookings entirely."
                       : "New bookings are paused. Customers will see a 'temporarily unavailable' message."}
                   </p>
                 </div>
@@ -2901,6 +2941,47 @@ const AdminDashboard = () => {
                   />
                 </button>
               </div>
+              
+              {/* Individual Hall Toggles */}
+              {branchList.find((b) => b.id === selectedBranch)?.halls?.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-border/50 space-y-4">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Screen Settings</h4>
+                  <div className="grid gap-4">
+                    {branchList.find((b) => b.id === selectedBranch)?.halls?.map((hall) => {
+                      const hallEnabled = hall.bookingsEnabled !== false; // default true
+                      return (
+                        <div key={hall.id} className="flex items-center justify-between p-4 rounded-lg bg-background border border-border/50">
+                          <div>
+                            <h5 className="font-medium text-foreground">{hall.name}</h5>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {hallEnabled ? "Open for bookings" : "Currently paused"}
+                            </p>
+                          </div>
+                          <button
+                            role="switch"
+                            aria-checked={hallEnabled}
+                            disabled={togglingBookings || !bookingsEnabled}
+                            onClick={() => handleToggleBookings(!hallEnabled, hall.id)}
+                            className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full border-2 transition-colors duration-300 focus:outline-none disabled:opacity-50 ${
+                              !bookingsEnabled ? "border-muted bg-muted" :
+                              hallEnabled
+                                ? "border-green-500 bg-green-500"
+                                : "border-red-400/60 bg-red-400/20"
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                                hallEnabled ? "translate-x-6" : "translate-x-0.5"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
               {togglingBookings && (
                 <p className="mt-3 text-xs text-muted-foreground font-body animate-pulse">Saving...</p>
               )}

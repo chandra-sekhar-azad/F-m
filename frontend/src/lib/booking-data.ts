@@ -6,6 +6,8 @@ export interface Branch {
   address: string;
   phone: string;
   mapLink?: string;
+  bookingsEnabled?: boolean;
+  halls?: { id: string; name: string; bookingsEnabled?: boolean }[];
 }
 
 export interface CakeOption {
@@ -63,9 +65,13 @@ export let BRANCHES: Branch[] = [
   {
     id: "branch-2",
     name: "Friends & Memories - Bhimavaram",
-    address: "Masid St, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
-    phone: "+91 99127 10933",
+    address: "Behind Ampere showroom, opposite JBR Convention, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
+    phone: "+91 99127 10932",
     mapLink: "https://maps.app.goo.gl/hc31fqJaDx6Veqkv7",
+    halls: [
+      { id: "prime", name: "Prime Screen" },
+      { id: "private", name: "Private Screen" }
+    ]
   },
 ];
 

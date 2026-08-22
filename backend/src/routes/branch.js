@@ -22,6 +22,7 @@ router.get('/', async (req, res) => {
           phone: catalog.phone || (globalDb.branches.find(b => b.id === bId)?.phone) || '',
           mapLink: catalog.mapLink || (globalDb.branches.find(b => b.id === bId)?.mapLink) || '',
           bookingsEnabled: catalog.bookingsEnabled !== false, // default true
+          halls: catalog.halls || [],
         });
       }
     }
@@ -78,10 +79,10 @@ router.put('/:id', verifyAdmin, async (req, res) => {
   }
 });
 
-// Toggle bookings on/off for a branch — persists directly to MongoDB
+// Toggle bookings on/off for a branch or a specific hall
 router.put('/:id/bookings-toggle', verifyAdmin, async (req, res) => {
   const { id } = req.params;
-  const { bookingsEnabled } = req.body;
+  const { bookingsEnabled, hallId } = req.body;
 
   if (typeof bookingsEnabled !== 'boolean') {
     return res.status(400).json({ error: 'bookingsEnabled must be a boolean' });
@@ -92,22 +93,41 @@ router.put('/:id/bookings-toggle', verifyAdmin, async (req, res) => {
     const models = getBranchModels(id);
 
     if (models) {
-      // Atomic update — cannot be lost by any concurrent save
-      await models.BranchCatalog.findOneAndUpdate(
-        { branch: id },
-        { $set: { bookingsEnabled } },
-        { upsert: true, new: true }
-      );
+      if (hallId) {
+        const doc = await models.BranchCatalog.findOne({ branch: id });
+        if (doc && doc.halls) {
+          const hallIndex = doc.halls.findIndex(h => h.id === hallId);
+          if (hallIndex !== -1) {
+            doc.halls[hallIndex].bookingsEnabled = bookingsEnabled;
+            doc.markModified('halls');
+            await doc.save();
+          }
+        }
+      } else {
+        // Atomic update — cannot be lost by any concurrent save
+        await models.BranchCatalog.findOneAndUpdate(
+          { branch: id },
+          { $set: { bookingsEnabled } },
+          { upsert: true, new: true }
+        );
+      }
     }
 
     // Also keep in-memory cache in sync so restarts read from DB
     if (branchPricingDbs[id]) {
-      branchPricingDbs[id].bookingsEnabled = bookingsEnabled;
+      if (hallId) {
+        if (branchPricingDbs[id].halls) {
+          const h = branchPricingDbs[id].halls.find(h => h.id === hallId);
+          if (h) h.bookingsEnabled = bookingsEnabled;
+        }
+      } else {
+        branchPricingDbs[id].bookingsEnabled = bookingsEnabled;
+      }
       await saveBranchPricingData(); // persist to file fallback too
     }
 
-    console.log(`[BOOKINGS-TOGGLE] Branch ${id} bookings ${bookingsEnabled ? 'ENABLED ✅' : 'DISABLED 🔴'}`);
-    res.json({ id, bookingsEnabled });
+    console.log(`[BOOKINGS-TOGGLE] Branch ${id}${hallId ? ` Hall ${hallId}` : ''} bookings ${bookingsEnabled ? 'ENABLED ✅' : 'DISABLED 🔴'}`);
+    res.json({ id, hallId, bookingsEnabled });
   } catch (error) {
     console.error('Error toggling bookings:', error);
     res.status(500).json({ error: 'Internal server error' });

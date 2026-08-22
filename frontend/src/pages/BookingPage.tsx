@@ -71,7 +71,7 @@ const BookingPage = () => {
   const [decorationPrice, setDecorationPrice] = useState(0);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [halls, setHalls] = useState<{ id: string; name: string }[]>([]);
+  const [halls, setHalls] = useState<{ id: string; name: string, bookingsEnabled?: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
   // Per-step lazy loading states
   const [occasionsLoaded, setOccasionsLoaded] = useState(false);
@@ -336,7 +336,13 @@ const BookingPage = () => {
   const totalPrice = useMemo(() => {
     let total = 0;
     if (booking.service && booking.duration) {
-      const servicePrice = pricing[booking.service]?.[booking.duration];
+      let servicePrice;
+      if (booking.hall && pricing[booking.service]?.[booking.hall]) {
+        servicePrice = pricing[booking.service][booking.hall]?.[booking.duration];
+      } else {
+        servicePrice = pricing[booking.service]?.[booking.duration];
+      }
+
       if (servicePrice !== undefined) {
         if (typeof servicePrice === 'object' && servicePrice.price !== undefined) {
           const effectivePrice = (servicePrice.offerPrice != null) ? servicePrice.offerPrice : servicePrice.price;
@@ -706,24 +712,32 @@ const BookingPage = () => {
                     <div>
                       <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Screen</label>
                       <div className="grid gap-3 grid-cols-2">
-                        {halls.map((hall) => (
-                          <button
-                            key={hall.id}
-                            onClick={() => update({ hall: hall.id })}
-                            className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all text-left ${
-                              booking.hall === hall.id
-                                ? "border-primary glow-gold bg-muted shadow-lg"
-                                : "border-border hover:border-primary hover:shadow-md"
-                            }`}
-                          >
-                            <div className="flex-1 text-center">
-                              <p className="font-bold text-foreground text-sm font-body">{hall.name}</p>
-                              {booking.hall === hall.id && (
-                                <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Selected ✓</span>
-                              )}
-                            </div>
-                          </button>
-                        ))}
+                        {halls.map((hall) => {
+                          const isPaused = hall.bookingsEnabled === false;
+                          return (
+                            <button
+                              key={hall.id}
+                              disabled={isPaused}
+                              onClick={() => update({ hall: hall.id })}
+                              className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all text-left ${
+                                isPaused
+                                  ? "border-muted bg-muted opacity-60 cursor-not-allowed"
+                                  : booking.hall === hall.id
+                                  ? "border-primary glow-gold bg-muted shadow-lg"
+                                  : "border-border hover:border-primary hover:shadow-md"
+                              }`}
+                            >
+                              <div className="flex-1 text-center">
+                                <p className="font-bold text-foreground text-sm font-body">{hall.name}</p>
+                                {isPaused ? (
+                                  <span className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">Paused</span>
+                                ) : booking.hall === hall.id ? (
+                                  <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Selected ✓</span>
+                                ) : null}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -962,12 +976,22 @@ const BookingPage = () => {
                     ...(isPremiumPack ? [] : [{ label: "Decoration", value: `Yes` }]),
                     {
                       label: (() => {
-                        const servicePrice = pricing[booking.service]?.[booking.duration];
+                        let servicePrice;
+                        if (booking.hall && pricing[booking.service]?.[booking.hall]) {
+                          servicePrice = pricing[booking.service][booking.hall]?.[booking.duration];
+                        } else {
+                          servicePrice = pricing[booking.service]?.[booking.duration];
+                        }
                         if (typeof servicePrice === 'object' && servicePrice?.offerPrice != null) return "Offer price";
                         return "Price";
                       })(),
                       value: (() => {
-                        const servicePrice = pricing[booking.service]?.[booking.duration];
+                        let servicePrice;
+                        if (booking.hall && pricing[booking.service]?.[booking.hall]) {
+                          servicePrice = pricing[booking.service][booking.hall]?.[booking.duration];
+                        } else {
+                          servicePrice = pricing[booking.service]?.[booking.duration];
+                        }
                         if (!servicePrice) return "N/A";
                         if (typeof servicePrice === 'object' && servicePrice.price !== undefined) {
                           const hasOfferPrice = servicePrice.offerPrice !== undefined && servicePrice.offerPrice !== null;

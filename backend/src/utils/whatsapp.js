@@ -368,3 +368,25 @@ export const sendWhatsAppCampaign = async ({ message, image, phones }) => {
 
   return { success: true, count: successCount, errors: errors.length ? errors : undefined };
 };
+
+/**
+ * Send a WhatsApp review request to a customer after their booking ends.
+ * @param {object} booking The booking object
+ */
+export const sendReviewRequestMessage = async (booking) => {
+  if (!booking || !booking.phone) return;
+  if (!isGatewayConfigured()) {
+    console.warn('⚠️ WhatsApp Gateway not configured, skipping review request');
+    return;
+  }
+
+  const message = `Please take a moment to share your experience with us 😊\n\nhttps://www.friendsandmemories.in/review\n\nhttps://tinyurl.com/fandm-google-reviews\n\nThank you for your support! ❤️\n\n— F&M`;
+
+  try {
+    await sendText(booking.phone, message);
+    console.log(`✅ Review request sent to ${booking.name} (${booking.phone})`);
+  } catch (err) {
+    console.error(`✗ WhatsApp review request failed for ${booking.phone}:`, err.message);
+    throw err;
+  }
+};

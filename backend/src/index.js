@@ -7,6 +7,7 @@ import { connectToMongo, getBranchModels } from './config/mongo.js';
 import { branchDbs, globalDb } from './config/constants.js';
 import { loadBookings, loadTimeSlots } from './utils/persistence.js';
 import { loadBranchPricingData } from './controllers/catalogController.js';
+import { startCronJobs } from './utils/cron.js';
 
 // Route Imports
 import adminRoutes from './routes/admin/index.js';
@@ -105,6 +106,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     await loadTimeSlots(branchDbs);
     await loadBranchPricingData();
     console.log('✓ All data sources initialised');
+    startCronJobs();
   } catch (error) {
     console.error('Startup Error:', error);
   }

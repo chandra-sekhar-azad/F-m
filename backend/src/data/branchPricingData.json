@@ -127,7 +127,21 @@
     "bookingsEnabled": true
   },
   "branch-2": {
-    "halls": [],
+    "name": "Friends & Memories - Bhimavaram",
+    "address": "4-Masid St, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
+    "phone": "+91 99127 10932",
+    "mapLink": "https://maps.app.goo.gl/hc31fqJaDx6Veqkv7",
+    "halls": [
+      {
+        "id": "prime",
+        "name": "Prime Screen",
+        "bookingsEnabled": true
+      },
+      {
+        "id": "private",
+        "name": "Private Screen"
+      }
+    ],
     "cakes": [
       {
         "id": "cake-1",
@@ -205,43 +219,83 @@
     ],
     "pricing": {
       "private-theatre-party-hall": {
-        "1": {
-          "price": 1500,
-          "offerPrice": 1300
+        "prime": {
+          "1": {
+            "price": 1500,
+            "offerPrice": 1300
+          },
+          "2": {
+            "price": 2500,
+            "offerPrice": 2000
+          },
+          "3": {
+            "price": 5000,
+            "offerPrice": 3999
+          },
+          "4": {
+            "price": 6500,
+            "offerPrice": 5499
+          }
         },
-        "2": {
-          "price": 2500,
-          "offerPrice": 2000
-        },
-        "3": {
-          "price": 5000,
-          "offerPrice": 3999
-        },
-        "4": {
-          "price": 6500,
-          "offerPrice": 5499
+        "private": {
+          "1": {
+            "price": 1500,
+            "offerPrice": 1300
+          },
+          "2": {
+            "price": 2500,
+            "offerPrice": 2000
+          },
+          "3": {
+            "price": 5000,
+            "offerPrice": 3999
+          },
+          "4": {
+            "price": 6500,
+            "offerPrice": 5499
+          }
         }
       },
       "premium-pack": {
-        "1": {
-          "price": 4500,
-          "offerPrice": 3999
+        "prime": {
+          "1": {
+            "price": 4500,
+            "offerPrice": 3999
+          },
+          "2": {
+            "price": 5500,
+            "offerPrice": 4999
+          },
+          "3": {
+            "price": 7500,
+            "offerPrice": 5999
+          },
+          "4": {
+            "price": 9000,
+            "offerPrice": 7499
+          }
         },
-        "2": {
-          "price": 5500,
-          "offerPrice": 4999
-        },
-        "3": {
-          "price": 7500,
-          "offerPrice": 5999
-        },
-        "4": {
-          "price": 9000,
-          "offerPrice": 7499
+        "private": {
+          "1": {
+            "price": 4500,
+            "offerPrice": 3999
+          },
+          "2": {
+            "price": 5500,
+            "offerPrice": 4999
+          },
+          "3": {
+            "price": 7500,
+            "offerPrice": 5999
+          },
+          "4": {
+            "price": 9000,
+            "offerPrice": 7499
+          }
         }
       }
     },
-    "decorationPrice": 1500,
+    "decorationPrice": 1,
     "testimonials": [],
     "heroImages": [],
     "branchVideos": [
@@ -258,6 +312,6 @@
       "facebook": "https://facebook.com",
       "whatsapp": ""
     },
-    "bookingsEnabled": true
+    "bookingsEnabled": false
   }
 }

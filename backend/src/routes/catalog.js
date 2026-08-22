@@ -88,13 +88,19 @@ router.put('/pricing', verifyAdmin, async (req, res) => {
     const resolved = await catalogController.getCatalogOrSendError(req, res, true);
     if (!resolved) return;
     const { branch, catalog } = resolved;
-    const { service, duration, price, offerPrice } = req.body;
+    const { service, hallId, duration, price, offerPrice } = req.body;
     if (!catalog.pricing[service]) catalog.pricing[service] = {};
     
+    let targetObj = catalog.pricing[service];
+    if (hallId) {
+      if (!targetObj[hallId]) targetObj[hallId] = {};
+      targetObj = targetObj[hallId];
+    }
+    
     if (offerPrice !== undefined && offerPrice !== null && offerPrice !== "") {
-      catalog.pricing[service][duration] = { price: Number(price), offerPrice: Number(offerPrice) };
+      targetObj[duration] = { price: Number(price), offerPrice: Number(offerPrice) };
     } else {
-      catalog.pricing[service][duration] = Number(price);
+      targetObj[duration] = Number(price);
     }
     
     await catalogController.saveCatalogForBranch(branch, catalog);

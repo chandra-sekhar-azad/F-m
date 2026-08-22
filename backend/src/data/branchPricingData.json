@@ -128,8 +128,8 @@
   },
   "branch-2": {
     "name": "Friends & Memories - Bhimavaram",
-    "address": "4-Masid St, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
-    "phone": "+91 99127 10932",
+    "address": "Behind Ampere showroom, opposite JBR Convention, Narasimhapuram, Kovvada, Bhimavaram, Andhra Pradesh 534202",
+    "phone": "+91 99127 10932,8074981198",
     "mapLink": "https://maps.app.goo.gl/hc31fqJaDx6Veqkv7",
     "halls": [
       {
@@ -222,7 +222,7 @@
         "prime": {
           "1": {
             "price": 1500,
-            "offerPrice": 1300
+            "offerPrice": 1499
           },
           "2": {
             "price": 2500,
@@ -312,6 +312,6 @@
       "facebook": "https://facebook.com",
       "whatsapp": ""
     },
-    "bookingsEnabled": false
+    "bookingsEnabled": true
   }
 }

@@ -4,6 +4,57 @@
 
 @layer base {
   :root {
+    --background: 40 20% 98%;
+    --foreground: 30 10% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 30 10% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 10% 8%;
+
+    --primary: 38 80% 55%;
+    --primary-foreground: 30 10% 8%;
+
+    --secondary: 40 20% 90%;
+    --secondary-foreground: 30 10% 8%;
+
+    --muted: 40 20% 92%;
+    --muted-foreground: 30 10% 40%;
+
+    --accent: 40 20% 90%;
+    --accent-foreground: 30 10% 8%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 30 8% 85%;
+    --input: 30 8% 85%;
+    --ring: 38 80% 55%;
+
+    --radius: 0.75rem;
+
+    --gold: 38 80% 45%;
+    --gold-light: 38 70% 60%;
+    --gold-dark: 38 90% 30%;
+    --purple-glow: 270 60% 70%;
+    --purple-deep: 270 40% 30%;
+
+    --sidebar-background: 40 20% 98%;
+    --sidebar-foreground: 30 10% 8%;
+    --sidebar-primary: 38 80% 55%;
+    --sidebar-primary-foreground: 30 10% 8%;
+    --sidebar-accent: 40 20% 90%;
+    --sidebar-accent-foreground: 30 10% 8%;
+    --sidebar-border: 30 8% 85%;
+    --sidebar-ring: 38 80% 55%;
+
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-brand: 'Syncopate', 'Orbitron', sans-serif;
+  }
+
+  .dark {
     --background: 30 10% 8%;
     --foreground: 40 20% 90%;
 
@@ -32,8 +83,6 @@
     --input: 30 8% 22%;
     --ring: 38 80% 55%;
 
-    --radius: 0.75rem;
-
     --gold: 38 80% 55%;
     --gold-light: 38 70% 70%;
     --gold-dark: 38 90% 40%;
@@ -48,10 +97,6 @@
     --sidebar-accent-foreground: 40 20% 90%;
     --sidebar-border: 30 8% 22%;
     --sidebar-ring: 38 80% 55%;
-
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-body: 'DM Sans', system-ui, sans-serif;
-    --font-brand: 'Syncopate', 'Orbitron', sans-serif;
   }
 }
 

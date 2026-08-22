@@ -19,7 +19,7 @@ const Index = () => {
   const [brokenVideoIds, setBrokenVideoIds] = useState<Record<string, true>>({});
   const [activeVideoBranch, setActiveVideoBranch] = useState<string>("branch-1");
   const [isVideoMuted, setIsVideoMuted] = useState(true);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoSectionRef = useRef<HTMLElement>(null);
 
@@ -68,7 +68,7 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [heroImages]);
 
-  
+
 
   useEffect(() => {
     const currentVideo = videoRef.current;
@@ -78,7 +78,7 @@ const Index = () => {
     currentVideo.volume = isVideoMuted ? 0 : 1;
 
     if (isVideoMuted) {
-      currentVideo.play().catch(() => {});
+      currentVideo.play().catch(() => { });
     }
   }, [activeVideoBranch, branchVideos, isVideoMuted]);
 
@@ -92,7 +92,7 @@ const Index = () => {
     setIsVideoMuted(nextMuted);
 
     if (!nextMuted) {
-      currentVideo.play().catch(() => {});
+      currentVideo.play().catch(() => { });
     }
   };
 
@@ -100,7 +100,7 @@ const Index = () => {
     setBrokenVideoIds((prev) => ({ ...prev, [video.id]: true }));
   };
 
-  
+
 
   return (
     <div className="min-h-screen">
@@ -126,8 +126,8 @@ const Index = () => {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/20" />
 
           {heroImages.length > 1 && (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-2">
@@ -153,7 +153,7 @@ const Index = () => {
             </p>
           </div>
           <h1 className="mb-6 max-w-4xl 3xl:max-w-6xl font-display text-4xl font-bold leading-tight text-foreground md:text-7xl 3xl:text-9xl animate-slide-up">
-            Best <span className="text-gradient-gold">Private Theatre</span> & Party Hall
+            Best <span className="text-orange-500">Private Theatre</span> & Party Hall
           </h1>
           <p className="mb-8 md:mb-10 max-w-xl 3xl:max-w-4xl text-base md:text-lg 3xl:text-3xl leading-relaxed text-muted-foreground font-body animate-slide-up delay-100">
             Book the <strong>best private theatre in Eluru</strong> or a <strong>premium private theatre in Bhimavaram</strong> for birthdays, anniversaries, proposals, or just a night out with friends. Affordable packages with custom decorations and cake.
@@ -161,13 +161,13 @@ const Index = () => {
           <div className="flex flex-wrap items-center gap-4 animate-slide-up delay-200">
             <Link
               to="/booking"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-8 py-4 text-sm font-semibold text-primary-foreground transition-all hover:scale-105 glow-gold font-body"
+              className="inline-flex items-center gap-2 rounded-full border border-black bg-white px-8 py-4 text-[36px] font-bold text-black transition-all hover:scale-105 glow-gold font-body"
             >
               Book Now <ArrowRight className="h-4 w-4" />
             </Link>
             <a
               href="#services"
-              className="inline-flex items-center gap-2 rounded-full border border-border px-8 py-4 text-sm font-medium text-foreground transition-colors hover:border-primary font-body"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-8 py-4 text-[30px] font-medium text-foreground transition-colors hover:border-primary font-body"
             >
               <Play className="h-4 w-4" /> View Services
             </a>
@@ -206,9 +206,8 @@ const Index = () => {
                 {/* Sliding background pill */}
                 <span
                   aria-hidden="true"
-                  className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full bg-gradient-gold shadow-md transition-transform duration-300 ease-in-out ${
-                    activeVideoBranch === "branch-2" ? "translate-x-[calc(100%+4px)]" : "translate-x-0"
-                  }`}
+                  className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full bg-gradient-gold shadow-md transition-transform duration-300 ease-in-out ${activeVideoBranch === "branch-2" ? "translate-x-[calc(100%+4px)]" : "translate-x-0"
+                    }`}
                 />
                 {/* Branch 1 button */}
                 <button
@@ -219,11 +218,10 @@ const Index = () => {
                     setIsVideoMuted(true);
                     if (videoRef.current) videoRef.current.pause();
                   }}
-                  className={`relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold font-body transition-colors duration-300 focus:outline-none ${
-                    activeVideoBranch === "branch-1"
+                  className={`relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold font-body transition-colors duration-300 focus:outline-none ${activeVideoBranch === "branch-1"
                       ? "text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   {branches.find(b => b.id === "branch-1")?.name?.split("-")[1]?.trim() || "Eluru"}
@@ -237,11 +235,10 @@ const Index = () => {
                     setIsVideoMuted(true);
                     if (videoRef.current) videoRef.current.pause();
                   }}
-                  className={`relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold font-body transition-colors duration-300 focus:outline-none ${
-                    activeVideoBranch === "branch-2"
+                  className={`relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold font-body transition-colors duration-300 focus:outline-none ${activeVideoBranch === "branch-2"
                       ? "text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   {branches.find(b => b.id === "branch-2")?.name?.split("-")[1]?.trim() || "Bhimavaram"}

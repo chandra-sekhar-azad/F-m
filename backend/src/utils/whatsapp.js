@@ -305,10 +305,12 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
   // ── 2. Admin notification ─────────────────────────────────────────────────
   if (adminPhone) {
     const adminPhones = adminPhone.split(',').map(p => p.trim()).filter(Boolean);
+    const branchName = booking.branch === 'branch-2' ? 'Bhimavaram' : 'Eluru';
     let adminMsg;
     if (isPremium) {
       adminMsg =
         `🌟 *New Premium Booking!*\n\n` +
+        `🏢 *Branch:* ${branchName}\n` +
         `👤 *Customer:* ${booking.name}\n` +
         `📞 *Phone:* ${booking.phone}\n` +
         `📅 *Date:* ${booking.date}\n` +
@@ -318,7 +320,8 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
     } else {
       adminMsg =
         `🎬 *New Standard Booking!*\n\n` +
-        `👤 *Customer:* ${booking.name}\n` +
+        `🏢 *Branch:* ${branchName}\n` +
+         `👤 *Customer:* ${booking.name}\n` +
         `📞 *Phone:* ${booking.phone}\n` +
         `📅 *Date:* ${booking.date}\n` +
         `⏰ *Slot:* ${booking.timeSlot}\n` +

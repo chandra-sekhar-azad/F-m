@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/Navbar";
 import { fetchBranches } from "@/lib/booking-data";
 import Loader from "@/components/Loader";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 // Eagerly load the home page (first page users see)
 import Index from "./pages/Index";
@@ -102,13 +103,15 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen">
-          <Toaster />
-          <Sonner />
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <AppShell />
-          </BrowserRouter>
-        </div>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <div className="min-h-screen">
+            <Toaster />
+            <Sonner />
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <AppShell />
+            </BrowserRouter>
+          </div>
+        </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

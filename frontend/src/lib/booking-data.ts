@@ -69,8 +69,8 @@ export let BRANCHES: Branch[] = [
     phone: "+91 99127 10932",
     mapLink: "https://maps.app.goo.gl/hc31fqJaDx6Veqkv7",
     halls: [
-      { id: "prime", name: "Prime Screen" },
-      { id: "private", name: "Private Screen" }
+      { id: "prime", name: "Prime Screen (Large)" },
+      { id: "private", name: "Private Screen (Mini)" }
     ]
   },
 ];

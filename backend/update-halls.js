@@ -15,7 +15,7 @@ async function run() {
     if (models) {
       const res = await models.BranchCatalog.updateOne(
         { branch: 'branch-2' },
-        { $set: { halls: [{ id: 'prime', name: 'Prime Screen' }, { id: 'private', name: 'Private Screen' }] } }
+        { $set: { halls: [{ id: 'prime', name: 'Prime Screen (Large)' }, { id: 'private', name: 'Private Screen (Mini)' }] } }
       );
       console.log('Updated in MongoDB:', res);
       process.exit(0);

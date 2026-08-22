@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,16 +30,17 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden items-center gap-2 lg:gap-6 3xl:gap-12 md:flex">
+        <div className="hidden items-center gap-1 lg:gap-3 3xl:gap-6 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              className={`rounded-full px-2 lg:px-5 py-2 text-xs lg:text-sm 3xl:text-xl font-medium transition-all ${link.highlight
-                  ? "bg-gradient-gold text-primary-foreground glow-gold"
-                  : location.pathname === link.href
+              className={`rounded-full px-2 lg:px-5 py-2 text-xs lg:text-sm 3xl:text-xl transition-all ${link.highlight
+                  ? "border border-black bg-white text-black glow-gold font-bold"
+                  : `font-medium ${location.pathname === link.href
                     ? "text-primary"
                     : "text-foreground hover:text-primary"
+                  }`
                 }`}
             >
               {link.label}
@@ -54,16 +56,20 @@ const Navbar = () => {
               <span className="font-semibold opacity-70">Bhimavaram:</span> +91 99127 10932
             </a>
           </div>
+          <ThemeToggle />
         </div>
 
         {/* Mobile toggle */}
-        <button 
-          onClick={() => setIsOpen(!isOpen)} 
-          className="text-foreground md:hidden"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button 
+            onClick={() => setIsOpen(!isOpen)} 
+            className="text-foreground"
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

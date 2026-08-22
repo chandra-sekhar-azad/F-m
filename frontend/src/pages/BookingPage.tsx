@@ -661,7 +661,7 @@ const BookingPage = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Branch</label>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
                       {branches.map((b) => {
                         const isPaused = b.bookingsEnabled === false;
                         return (
@@ -669,7 +669,7 @@ const BookingPage = () => {
                             key={b.id}
                             onClick={() => !isPaused && update({ branch: b.id })}
                             disabled={isPaused}
-                            className={`rounded-2xl border-2 p-6 text-left transition-all relative ${
+                            className={`rounded-2xl border-2 p-3 md:p-6 text-left transition-all relative ${
                               isPaused
                                 ? "border-red-500/20 opacity-70 cursor-not-allowed bg-red-500/5"
                                 : booking.branch === b.id
@@ -693,8 +693,7 @@ const BookingPage = () => {
                                 )}
                               </div>
                             </div>
-                            <p className="text-sm text-muted-foreground font-body leading-relaxed">{b.address}</p>
-                            {b.phone && <p className="mt-2 text-xs text-primary font-body font-medium">📞 {b.phone}</p>}
+
                             {isPaused && (
                               <div className="mt-3 rounded-xl bg-red-500/10 border border-red-500/20 px-3 py-2">
                                 <p className="text-xs text-red-500 font-semibold font-body leading-relaxed">
@@ -763,6 +762,7 @@ const BookingPage = () => {
                                     <li>Cake</li>
                                     <li>Theatre</li>
                                     <li>Decoration</li>
+                                    <li>Reel shoot</li>
                                   </ul>
                                 </>
                               ) : (
@@ -822,7 +822,7 @@ const BookingPage = () => {
                       )}
                       {(booking.branch === "branch-2" || branches.find(b => b.id === booking.branch)?.name.toLowerCase().includes("bhimavaram")) && (
                         <p className="mt-1 text-[10px] text-red-500 font-bold font-body animate-bounce">
-                          * Maximum 10 persons allowed for Bhimavaram branch.
+                          * Maximum 15 persons allowed for Bhimavaram branch.
                         </p>
                       )}
                     </div>

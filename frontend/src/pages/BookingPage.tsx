@@ -367,6 +367,38 @@ const BookingPage = () => {
     return total;
   }, [booking, pricing, decorationPrice]);
 
+  const originalTotalPrice = useMemo(() => {
+    let total = 0;
+    if (booking.service && booking.duration) {
+      let servicePrice;
+      if (booking.hall && pricing[booking.service]?.[booking.hall]) {
+        servicePrice = pricing[booking.service][booking.hall]?.[booking.duration];
+      } else {
+        servicePrice = pricing[booking.service]?.[booking.duration];
+      }
+
+      if (servicePrice !== undefined) {
+        if (typeof servicePrice === 'object' && servicePrice.price !== undefined) {
+          total += servicePrice.price;
+        } else {
+          total += servicePrice;
+        }
+      }
+    }
+    if (booking.decorationRequired) total += decorationPrice;
+    
+    const getOriginal = (item: any) => item.price !== undefined ? item.price : getEffectivePrice(item);
+
+    if (booking.selectedCake) total += getOriginal(booking.selectedCake);
+    booking.extraDecorations.forEach((d) => (total += getOriginal(d)));
+
+    if (booking.branch === "branch-1" && booking.membersCount > 10) {
+      total += (booking.membersCount - 10) * 150;
+    }
+    total += SERVICE_CHARGE;
+    return total;
+  }, [booking, pricing, decorationPrice]);
+
   const advanceAmount = useMemo(() => totalPrice < 3000 ? 1011 : 1511, [totalPrice]);
   const balanceAmount = useMemo(() => totalPrice - advanceAmount, [totalPrice, advanceAmount]);
 
@@ -651,7 +683,14 @@ const BookingPage = () => {
                 {step < 5 && (
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground font-body">Total Estimation</p>
-                    <p className="text-lg font-bold text-primary font-display">₹{totalPrice.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-primary font-display flex items-center justify-end gap-2">
+                      {originalTotalPrice > totalPrice && (
+                        <span className="text-sm text-muted-foreground line-through decoration-red-500/50">
+                          ₹{originalTotalPrice.toLocaleString()}
+                        </span>
+                      )}
+                      ₹{totalPrice.toLocaleString()}
+                    </p>
                   </div>
                 )}
               </div>
@@ -682,14 +721,16 @@ const BookingPage = () => {
                                 Stopped
                               </span>
                             )}
-                            <div className="flex items-start gap-3 mb-3">
+                            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-3 mb-1 md:mb-3">
                               <div className={`p-2 rounded-lg ${booking.branch === b.id && !isPaused ? "bg-primary/20" : "bg-muted"}`}>
-                                <MapPin className={`h-5 w-5 ${booking.branch === b.id && !isPaused ? "text-primary" : "text-muted-foreground"}`} />
+                                <MapPin className={`h-4 w-4 md:h-5 md:w-5 ${booking.branch === b.id && !isPaused ? "text-primary" : "text-muted-foreground"}`} />
                               </div>
                               <div>
-                                <p className="font-bold text-foreground text-base font-body">{b.name}</p>
+                                <p className="font-bold text-foreground text-xs md:text-base font-body leading-tight">
+                                  {b.name.split("-")[1]?.trim() || b.name}
+                                </p>
                                 {booking.branch === b.id && !isPaused && (
-                                  <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Selected ✓</span>
+                                  <span className="text-[9px] md:text-[10px] font-semibold text-primary uppercase tracking-wide block mt-1">Selected ✓</span>
                                 )}
                               </div>
                             </div>

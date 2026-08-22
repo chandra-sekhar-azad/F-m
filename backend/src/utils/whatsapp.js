@@ -304,6 +304,7 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
 
   // ── 2. Admin notification ─────────────────────────────────────────────────
   if (adminPhone) {
+    const adminPhones = adminPhone.split(',').map(p => p.trim()).filter(Boolean);
     let adminMsg;
     if (isPremium) {
       adminMsg =
@@ -327,10 +328,12 @@ export const sendBookingWhatsAppNotifications = async (booking) => {
         `💰 *Amount:* ₹${booking.totalPrice}`;
     }
 
-    promises.push(
-      sendText(adminPhone, adminMsg)
-        .catch(err => console.error('✗ WhatsApp admin notification failed:', err.message))
-    );
+    for (const phone of adminPhones) {
+      promises.push(
+        sendText(phone, adminMsg)
+          .catch(err => console.error('✗ WhatsApp admin notification failed:', err.message))
+      );
+    }
   }
 
   await Promise.all(promises);

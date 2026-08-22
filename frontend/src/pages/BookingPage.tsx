@@ -92,6 +92,17 @@ const BookingPage = () => {
     if (savedBooking) {
       try {
         const parsedBooking = JSON.parse(savedBooking);
+        
+        // Ensure the saved date is not in the past
+        if (parsedBooking.date) {
+          const today = new Date();
+          const localTodayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+          if (parsedBooking.date < localTodayStr) {
+            parsedBooking.date = "";
+            parsedBooking.timeSlot = "";
+          }
+        }
+        
         setBooking(parsedBooking);
       } catch (error) {
         console.error('Failed to restore booking state:', error);

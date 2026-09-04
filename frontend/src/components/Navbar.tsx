@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   const links = [
@@ -21,11 +19,10 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-3 md:gap-6 shrink-0 transition-opacity hover:opacity-80">
           <img src="/logo.png" alt="F&M Logo" className="h-8 w-auto md:h-10 3xl:h-14 object-contain" />
           <span
-            className="text-base md:text-xl 3xl:text-3xl font-bold tracking-widest text-primary uppercase"
+            className="hidden md:inline-block text-base md:text-xl 3xl:text-3xl font-bold tracking-widest text-primary uppercase"
             style={{ fontFamily: "var(--font-brand)" }}
           >
-            <span className="hidden sm:inline">Friends&amp;Memories</span>
-            <span className="sm:hidden">F&amp;M</span>
+            Friends&amp;Memories
           </span>
         </Link>
 
@@ -59,45 +56,32 @@ const Navbar = () => {
           <ThemeToggle />
         </div>
 
-        {/* Mobile toggle */}
-        <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
-          <button 
-            onClick={() => setIsOpen(!isOpen)} 
-            className="text-foreground"
-            aria-label={isOpen ? "Close menu" : "Open menu"}
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="border-t border-border bg-background px-4 pb-4 md:hidden">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              onClick={() => setIsOpen(false)}
-              className={`block py-3 text-sm font-medium ${link.highlight ? "text-primary" : "text-foreground"
+        {/* Mobile toggle & Links */}
+        <div className="flex flex-1 items-center justify-end overflow-hidden ml-3 md:hidden">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+            {links.filter(l => !l.highlight).map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={`shrink-0 whitespace-nowrap text-[11px] font-medium transition-colors ${
+                  location.pathname === link.href ? "text-primary font-bold" : "text-foreground/80 hover:text-foreground"
                 }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              to="/booking"
+              className="shrink-0 rounded-full px-3 py-1.5 text-[11px] border border-black bg-white text-black glow-gold font-bold whitespace-nowrap ml-1"
             >
-              {link.label}
+              Book Now
             </Link>
-          ))}
-          <div className="py-3 space-y-3">
-            <a href="tel:+917680006662" className="flex items-center gap-4 text-sm text-foreground hover:text-primary transition-colors">
-              <Phone className="h-4 w-4 text-primary" />
-              <span><span className="font-semibold">Eluru:</span> +91 76800 06662</span>
-            </a>
-            <a href="tel:+919912710932" className="flex items-center gap-4 text-sm text-foreground hover:text-primary transition-colors">
-              <Phone className="h-4 w-4 text-primary" />
-              <span><span className="font-semibold">Bhimavaram:</span> +91 99127 10932</span>
-            </a>
+            <div className="shrink-0">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

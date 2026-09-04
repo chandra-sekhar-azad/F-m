@@ -113,38 +113,38 @@ const ReviewSection = ({ showForm = true, showReviews = true }: ReviewSectionPro
                   <div className="flex">
                     {reviews.map((review, idx) => (
                       <div key={review._id || idx} className="flex-[0_0_100%] min-w-0 px-2">
-                        <div className="bg-[#141414] border border-white/5 p-6 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden group min-h-[320px] flex flex-col">
+                        <div className="bg-[#141414] border border-white/5 p-5 md:p-6 rounded-3xl shadow-2xl relative overflow-hidden group min-h-[240px] flex flex-col">
                           {/* Inner glow */}
                           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                          <Quote className="absolute top-8 right-8 h-12 w-12 text-primary/10" />
+                          <Quote className="absolute top-5 right-5 h-8 w-8 text-primary/10" />
 
-                          <div className="flex gap-1.5 mb-8 relative z-10">
+                          <div className="flex gap-1 mb-4 relative z-10">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`h-5 w-5 ${i < review.rating ? "fill-primary text-primary" : "text-white/10"}`}
+                                className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-white/10"}`}
                               />
                             ))}
                           </div>
 
-                          <blockquote className="relative z-10 text-lg md:text-xl text-white/90 font-display italic leading-relaxed mb-8">
+                          <blockquote className="relative z-10 text-base md:text-lg text-white/90 font-display italic leading-relaxed mb-4">
                             "{review.comment}"
                           </blockquote>
 
-                          <div className="flex items-center gap-4 pt-8 border-t border-white/5 mt-auto relative z-10">
+                          <div className="flex items-center gap-3 pt-4 border-t border-white/5 mt-auto relative z-10">
                             <div className="relative">
-                              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center text-primary font-display font-bold text-lg uppercase">
+                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center text-primary font-display font-bold text-base uppercase">
                                 {review.name.charAt(0)}
                               </div>
-                              <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1 border-2 border-[#141414]">
-                                <Sparkles className="h-3 w-3 text-primary-foreground" />
+                              <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-0.5 border-2 border-[#141414]">
+                                <Sparkles className="h-2.5 w-2.5 text-primary-foreground" />
                               </div>
                             </div>
                             <div>
-                              <p className="font-bold text-white text-base font-display tracking-wide capitalize">{review.name}</p>
-                              <p className="text-[10px] text-muted-foreground font-body uppercase tracking-[0.2em] mt-1">
-                                Verified Experience • {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                              <p className="font-bold text-white text-sm font-display tracking-wide capitalize">{review.name}</p>
+                              <p className="text-[9px] text-muted-foreground font-body uppercase tracking-[0.2em] mt-0.5">
+                                Verified • {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
                               </p>
                             </div>
                           </div>

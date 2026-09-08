@@ -289,6 +289,9 @@ router.post('/process', async (req, res) => {
 });
 
 router.post('/mock', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Mock payment disabled in production' });
+  }
   const { bookingId, amountPaid, paymentType } = req.body;
   try {
     const paymentMode = req.body.paymentMode || 'mock';

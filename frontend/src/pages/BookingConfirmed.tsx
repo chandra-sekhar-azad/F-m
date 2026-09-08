@@ -35,19 +35,7 @@ const BookingConfirmed = () => {
           const parts = orderId.split('_');
           const bookingId = parts.length > 1 ? parts.slice(1, -1).join('_') : null;
           
-          if (statusResponse.success && statusResponse.status === "paid") {
-            // Finalize on backend (send notification etc)
-            const finalizeRes = await api.processMockPayment(
-              bookingId, 
-              statusResponse.amount / 100 // paise to rupees
-            );
-            
-            if (finalizeRes.success) {
-               setBooking(finalizeRes.booking);
-               setLoading(false);
-               return;
-            }
-          }
+
           
           // If we have a bookingId but flow didn't finish, try fetching it
           if (bookingId) {

@@ -525,22 +525,7 @@ const BookingPage = () => {
             localStorage.removeItem('bookingState');
             localStorage.removeItem('bookingStep');
 
-            // Update booking payment status in background (non-blocking)
-            Promise.resolve()
-              .then(() => {
-                console.log("📤 Sending payment confirmation to backend...");
-                return api.processMockPayment(
-                  createdBooking.id,
-                  amountToPay,
-                  paymentType
-                );
-              })
-              .then(() => {
-                console.log("✅ Backend payment processed");
-              })
-              .catch((processError) => {
-                console.error("⚠️ Backend processing failed (non-blocking):", processError);
-              });
+
 
             // Verify payment signature with backend (non-blocking)
             Promise.resolve()

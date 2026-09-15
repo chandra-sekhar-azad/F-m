@@ -517,15 +517,6 @@ export const api = {
     return res.json();
   },
 
-  async processMockPayment(bookingId: string, amount: number, paymentType: string = 'full'): Promise<any> {
-    const res = await fetch(`${API_BASE}/payments/mock`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId, amountPaid: amount, paymentType }),
-    });
-    if (!res.ok) throw new Error("Failed to process mock payment");
-    return res.json();
-  },
 
   async downloadBookingsExcel(token: string, branch?: string): Promise<void> {
     let url = `${API_BASE}/admin/bookings/download`;

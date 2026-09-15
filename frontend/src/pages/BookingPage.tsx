@@ -450,7 +450,7 @@ const BookingPage = () => {
     });
   };
 
-  const handlePayment = async (paymentMethod: 'razorpay' | 'mock' = 'razorpay') => {
+  const handlePayment = async () => {
     try {
       setPaymentLoading(true);
 
@@ -470,21 +470,7 @@ const BookingPage = () => {
 
       const createdBooking = await api.createBooking(bookingData);
 
-      if (paymentMethod === 'mock') {
-        const paymentResponse = await api.processMockPayment(
-          createdBooking.id,
-          amountToPay,
-          paymentType
-        );
-
-        if (paymentResponse.success) {
-          // Clear booking state from localStorage on successful completion
-          localStorage.removeItem('bookingState');
-          localStorage.removeItem('bookingStep');
-          navigate("/booking-confirmed", { state: { booking: paymentResponse.booking } });
-        }
-      } else {
-        // Load Razorpay script
+      // Load Razorpay script
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded) {
           throw new Error("Failed to load Razorpay script");
@@ -610,7 +596,6 @@ const BookingPage = () => {
           setPaymentLoading(false);
         });
         razorpay.open();
-      }
     } catch (error) {
       console.error("Payment failed:", error);
       alert(`Payment failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -1158,16 +1143,7 @@ const BookingPage = () => {
                       {paymentLoading ? "Connecting..." : `Pay ₹${advanceAmount.toLocaleString()} Now`}
                     </button>
 
-                    {/* Dev-only mock payment button — hidden in production builds */}
-                    {import.meta.env.DEV && (
-                      <button
-                        onClick={() => handlePayment('mock')}
-                        disabled={paymentLoading}
-                        className="w-full rounded-xl border-2 border-dashed border-yellow-400 bg-yellow-50 py-3 text-sm font-bold text-yellow-800 transition-all hover:bg-yellow-100 disabled:opacity-50 font-body"
-                      >
-                        {paymentLoading ? "Processing..." : `[DEV] Mock Pay ₹${advanceAmount.toLocaleString()}`}
-                      </button>
-                    )}
+
 
                     <button
                       onClick={() => {

@@ -288,23 +288,6 @@ router.post('/process', async (req, res) => {
   }
 });
 
-router.post('/mock', async (req, res) => {
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(404).json({ error: 'Mock payment disabled in production' });
-  }
-  const { bookingId, amountPaid, paymentType } = req.body;
-  try {
-    const paymentMode = req.body.paymentMode || 'mock';
-    const booking = await updateBookingPayment(bookingId, amountPaid, paymentType, paymentMode);
-    if (booking) {
-      return res.json({ success: true, message: 'Mock payment processed', booking });
-    }
-    res.status(404).json({ error: 'Booking not found' });
-  } catch (error) {
-    console.error('Error processing mock payment:', error);
-    res.status(500).json({ error: 'Failed to process mock payment' });
-  }
-});
 
 router.get('/:bookingId', async (req, res) => {
   const { bookingId } = req.params;

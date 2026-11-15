@@ -3,6 +3,8 @@ import * as bookingController from '../controllers/bookingController.js';
 import { verifyAdmin } from '../middleware/auth.js';
 import { getCatalogForBranch } from '../controllers/catalogController.js';
 import { globalDb } from '../config/constants.js';
+import { createPostgresClient } from '../db/client.js';
+import { branches as branchTable } from '../db/schema.js';
 
 const router = express.Router();
 
@@ -19,19 +21,22 @@ router.get('/step/branch-service/:branchId', async (req, res) => {
     if (!catalog) return res.status(404).json({ error: 'Branch not found' });
 
     // All branches with bookingsEnabled flag
-    const { branchDbs } = await import('../config/constants.js');
+    const { db, client } = createPostgresClient();
+    const branchRows = await db.select().from(branchTable);
+    await client.end({ timeout: 5 });
     const branches = [];
-    for (const bId of Object.keys(branchDbs)) {
+    for (const row of branchRows) {
+      const bId = row.id;
       const bCatalog = await getCatalogForBranch(bId);
       if (bCatalog) {
         branches.push({
           id: bId,
-          name: bCatalog.name || bId,
-          address: bCatalog.address || '',
-          phone: bCatalog.phone || '',
-          mapLink: bCatalog.mapLink || '',
-          bookingsEnabled: bCatalog.bookingsEnabled !== false,
-          halls: bCatalog.halls || [],
+          name: bCatalog.name || row.name || bId,
+          address: bCatalog.address || row.address || '',
+          phone: bCatalog.phone || row.phone || '',
+          mapLink: bCatalog.mapLink || row.mapLink || '',
+          bookingsEnabled: row.bookingsEnabled,
+          halls: row.halls || [],
         });
       }
     }

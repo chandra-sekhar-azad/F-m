@@ -29,7 +29,6 @@ export const defaultPricing = {
     4: { price: 9000, offerPrice: 7499 }
   }
 };
-
 export const globalDb = {
   branches: [
     {
@@ -67,12 +66,6 @@ export const globalDb = {
   heroImages: [],
   socialLinks: { instagram: "https://instagram.com/friends_and_memories_elr", facebook: "https://facebook.com", whatsapp: "" }
 };
-
-export const branchDbs = {
-  'branch-1': { bookings: [], timeSlots: [] },
-  'branch-2': { bookings: [], timeSlots: [] },
-};
-
 export const createBranchPricingDb = (branchId) => {
   const branchInfo = branchId ? globalDb.branches.find(b => b.id === branchId) : null;
   return {
@@ -94,26 +87,3 @@ export const createBranchPricingDb = (branchId) => {
     bookingsEnabled: true, // default open
   };
 };
-
-export const branchPricingDbs = {
-  'branch-1': createBranchPricingDb(),
-  'branch-2': createBranchPricingDb(),
-};
-
-export const cloneBranchPricingDb = (data = {}) => ({
-  name: data.name,
-  address: data.address,
-  phone: data.phone,
-  mapLink: data.mapLink,
-  halls: JSON.parse(JSON.stringify(data.halls || [])),
-  cakes: JSON.parse(JSON.stringify(data.cakes || defaultCakes.map(c => ({ ...c, quantity: '1kg' })))),
-  decorations: JSON.parse(JSON.stringify(data.decorations || defaultDecorations)),
-  pricing: JSON.parse(JSON.stringify(data.pricing || defaultPricing)),
-  decorationPrice: data.decorationPrice ?? 1500,
-  testimonials: JSON.parse(JSON.stringify(data.testimonials || [])),
-  heroImages: JSON.parse(JSON.stringify(data.heroImages || [])),
-  branchVideos: JSON.parse(JSON.stringify(data.branchVideos || [])),
-  galleryVideos: JSON.parse(JSON.stringify(data.galleryVideos || [])),
-  socialLinks: JSON.parse(JSON.stringify(data.socialLinks || { instagram: "https://instagram.com/friends_and_memories_elr", facebook: "https://facebook.com", whatsapp: "" })),
-  bookingsEnabled: data.bookingsEnabled !== false, // preserve false explicitly; default true
-});

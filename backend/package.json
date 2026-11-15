@@ -8,6 +8,9 @@
     "dev": "node --watch server.js",
     "build": "echo 'Frontend is pre-built into backend/public — no build step needed'",
     "start": "node server.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:backfill-users": "node src/scripts/backfillUsers.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
@@ -26,14 +29,16 @@
     "cloudinary": "^2.9.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
+    "drizzle-orm": "^0.45.4",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.0.0",
+    "postgres": "^4.1.1",
     "twilio": "^5.13.1",
     "uuid": "^14.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.11",
     "nodemon": "^3.0.1"
   }
 }

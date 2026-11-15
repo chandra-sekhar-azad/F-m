@@ -3,10 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { connectToMongo, getBranchModels } from './config/mongo.js';
-import { branchDbs, globalDb } from './config/constants.js';
-import { loadBookings, loadTimeSlots } from './utils/persistence.js';
-import { loadBranchPricingData } from './controllers/catalogController.js';
+import { createPostgresClient } from './db/client.js';
+import { bookings } from './db/schema.js';
+import { sql } from 'drizzle-orm';
 import { startCronJobs } from './utils/cron.js';
 
 // Route Imports
@@ -50,31 +49,13 @@ app.use('/api/booking', bookingRoutes);
 
 
 
-// Health & Debug
-app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 app.get('/api/debug/bookings-count', async (req, res) => {
-  const counts = {};
-  let total = 0;
-  
-  for (const branchId in branchDbs) {
-    let branchTotal = 0;
-    const models = getBranchModels(branchId);
-    
-    if (models) {
-      try {
-        branchTotal = await models.Booking.countDocuments();
-      } catch (e) {
-        console.error(`Error counting Mongo bookings for ${branchId}:`, e.message);
-      }
-    } else {
-      branchTotal = branchDbs[branchId].bookings.length;
-    }
-    
-    counts[branchId] = branchTotal;
-    total += branchTotal;
-  }
-  
-  res.json({ counts, total, timestamp: new Date(), storage: Object.keys(counts).map(id => ({ id, type: getBranchModels(id) ? 'MongoDB' : 'File' })) });
+  const { db, client } = createPostgresClient();
+  try {
+    const rows = await db.select({ branch: bookings.branch, count: sql`count(*)::int` }).from(bookings).groupBy(bookings.branch);
+    const counts = Object.fromEntries(rows.map((row) => [row.branch, row.count]));
+    res.json({ counts, total: Object.values(counts).reduce((total, count) => total + count, 0), timestamp: new Date(), storage: 'Postgres' });
+  } finally { await client.end({ timeout: 5 }); }
 });
 
 // SPA fallback — all non-API routes serve the React app
@@ -96,19 +77,5 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`PORT env: ${process.env.PORT}`);
 });
 
-// Connect to MongoDB and load data after server is already listening
-(async () => {
-  try {
-    await connectToMongo('branch-1', process.env.MONGODB_URI_BRANCH1);
-    await connectToMongo('branch-2', process.env.MONGODB_URI_BRANCH2);
-    await connectToMongo('reviews', process.env.MONGODB_URI_REVIEWS);
-    await loadBookings(branchDbs);
-    await loadTimeSlots(branchDbs);
-    await loadBranchPricingData();
-    console.log('✓ All data sources initialised');
-    startCronJobs();
-  } catch (error) {
-    console.error('Startup Error:', error);
-  }
-})();
+startCronJobs();
  

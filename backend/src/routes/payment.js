@@ -1,8 +1,8 @@
 import express from 'express';
 import crypto from 'crypto';
-import { getBranchModels } from '../config/mongo.js';
-import { branchDbs } from '../config/constants.js';
-import { saveBookings } from '../utils/persistence.js';
+import { eq } from 'drizzle-orm';
+import { createPostgresClient } from '../db/client.js';
+import { bookings } from '../db/schema.js';
 import { sendBookingWhatsAppNotifications } from '../utils/whatsapp.js';
 
 const router = express.Router();
@@ -191,86 +191,24 @@ router.post('/razorpay/status', async (req, res) => {
   }
 });
 
-// Helper to find and update booking across any storage
+// Helper to find and update a Postgres booking.
 const updateBookingPayment = async (bookingId, amountPaid, paymentType, paymentMode) => {
   let amt = Number(amountPaid) || 0;
   const resolvedPaymentType = paymentType === 'full' || paymentType === 'advance'
     ? paymentType
     : undefined;
   
-  // Try MongoDB branches
-  const branchIds = ['branch-1', 'branch-2'];
-  for (const branchId of branchIds) {
-    const models = getBranchModels(branchId);
-    if (models) {
-      const booking = await models.Booking.findOne({ id: bookingId });
-      if (booking) {
-        // For Razorpay, never assume the full amount if the paid amount is unavailable.
-        if (amountPaid === null || amountPaid === undefined) {
-          amt = paymentMode === 'razorpay' ? (Number(booking.amountPaid) || 0) : booking.totalPrice;
-        }
-        
-        const prevStatus = booking.paymentStatus;
-        const newStatus = (amt >= booking.totalPrice) ? 'paid' : 'partially-paid';
-
-        booking.paymentStatus = newStatus;
-        booking.amountPaid = amt;
-        booking.balanceAmount = Math.max(0, booking.totalPrice - amt);
-        booking.paymentType = resolvedPaymentType || (amt >= booking.totalPrice ? 'full' : 'advance');
-        if (paymentMode) booking.paymentMode = paymentMode;
-        booking.updatedAt = new Date();
-        await booking.save();
-        
-        console.log(`✅ Updated booking ${bookingId}: Status=${booking.paymentStatus}, Amount=₹${amt}/${booking.totalPrice}`);
-        
-        // Send customer/admin notifications when the payment first reaches advance or full status.
-        const shouldSendNotifications = (newStatus === 'paid' || newStatus === 'partially-paid') && newStatus !== prevStatus;
-        if (shouldSendNotifications) {
-          sendPaymentNotifications(booking);
-        } else {
-          console.log(`ℹ️ Booking ${bookingId} status unchanged (${prevStatus}) — skipping duplicate payment notification`);
-        }
-        
-        return booking;
-      }
-    }
-  }
-
-  // Try local file branches
-  for (const branchId in branchDbs) {
-    const booking = branchDbs[branchId].bookings.find(b => b.id === bookingId);
-    if (booking) {
-      // For Razorpay, never assume the full amount if the paid amount is unavailable.
-      if (amountPaid === null || amountPaid === undefined) {
-        amt = paymentMode === 'razorpay' ? (Number(booking.amountPaid) || 0) : booking.totalPrice;
-      }
-      
-      const prevStatus = booking.paymentStatus;
-      const newStatus = (amt >= booking.totalPrice) ? 'paid' : 'partially-paid';
-
-      booking.paymentStatus = newStatus;
-      booking.amountPaid = amt;
-      booking.balanceAmount = Math.max(0, booking.totalPrice - amt);
-      booking.paymentType = resolvedPaymentType || (amt >= booking.totalPrice ? 'full' : 'advance');
-      if (paymentMode) booking.paymentMode = paymentMode;
-      booking.updatedAt = new Date();
-      await saveBookings(branchDbs);
-      
-      console.log(`✅ Updated booking ${bookingId}: Status=${booking.paymentStatus}, Amount=₹${amt}/${booking.totalPrice}`);
-      
-      // Send customer/admin notifications when the payment first reaches advance or full status.
-      const shouldSendNotifications = (newStatus === 'paid' || newStatus === 'partially-paid') && newStatus !== prevStatus;
-      if (shouldSendNotifications) {
-        sendPaymentNotifications(booking);
-      } else {
-        console.log(`ℹ️ Booking ${bookingId} status unchanged (${prevStatus}) — skipping duplicate payment notification`);
-      }
-      
-      return booking;
-    }
-  }
-  
-  return null;
+  const { db, client } = createPostgresClient();
+  try {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId));
+    if (!booking) return null;
+    if (amountPaid === null || amountPaid === undefined) amt = paymentMode === 'razorpay' ? Number(booking.amountPaid || 0) : Number(booking.totalPrice);
+    const totalPrice = Number(booking.totalPrice); const newStatus = amt >= totalPrice ? 'paid' : 'partially-paid';
+    const [saved] = await db.update(bookings).set({ paymentStatus: newStatus, amountPaid: String(amt), balanceAmount: String(Math.max(0, totalPrice - amt)), paymentType: resolvedPaymentType || (amt >= totalPrice ? 'full' : 'advance'), paymentMode: paymentMode || booking.paymentMode, updatedAt: new Date() }).where(eq(bookings.id, bookingId)).returning();
+    const output = { ...saved, totalPrice: Number(saved.totalPrice), amountPaid: Number(saved.amountPaid), balanceAmount: Number(saved.balanceAmount) };
+    if (newStatus !== booking.paymentStatus) sendPaymentNotifications(output);
+    return output;
+  } finally { await client.end({ timeout: 5 }); }
 };
 
 router.post('/process', async (req, res) => {
@@ -292,17 +230,10 @@ router.post('/process', async (req, res) => {
 router.get('/:bookingId', async (req, res) => {
   const { bookingId } = req.params;
   try {
-    for (const branchId in branchDbs) {
-      const models = getBranchModels(branchId);
-      if (models) {
-        const booking = await models.Booking.findOne({ id: bookingId });
-        if (booking) return res.json({ bookingId: booking.id, paymentStatus: booking.paymentStatus });
-      }
-    }
-    for (const branchId in branchDbs) {
-      const booking = branchDbs[branchId].bookings.find(b => b.id === bookingId);
-      if (booking) return res.json({ bookingId: booking.id, paymentStatus: booking.paymentStatus });
-    }
+    const { db, client } = createPostgresClient();
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId));
+    await client.end({ timeout: 5 });
+    if (booking) return res.json({ bookingId: booking.id, paymentStatus: booking.paymentStatus });
     res.status(404).json({ error: 'Not found' });
   } catch (error) {
     res.status(500).json({ error: 'Failed' });

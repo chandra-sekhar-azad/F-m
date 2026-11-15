@@ -323,7 +323,10 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(booking),
     });
-    if (!res.ok) throw new Error("Failed to create booking");
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || "Failed to create booking");
+    }
     return res.json();
   },
 
@@ -515,6 +518,17 @@ export const api = {
     });
     if (!res.ok) throw new Error("Failed to check payment status");
     return res.json();
+  },
+
+  async processMockPayment(bookingId: string, amountPaid: number, paymentType: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/payments/mock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId, amountPaid, paymentType }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Mock payment is unavailable");
+    return data;
   },
 
 

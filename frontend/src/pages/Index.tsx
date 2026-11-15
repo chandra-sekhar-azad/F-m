@@ -42,8 +42,8 @@ const Index = () => {
   const [currentHero, setCurrentHero] = useState(0);
   const [branchVideos, setBranchVideos] = useState<Record<string, BranchVideo[]>>({});
   const [brokenVideoIds, setBrokenVideoIds] = useState<Record<string, true>>({});
-  const [activeVideoBranch, setActiveVideoBranch] = useState<string>("branch-1");
-  const [activeServiceBranch, setActiveServiceBranch] = useState<"eluru" | "bhimavaram">("eluru");
+  const [activeVideoBranch, setActiveVideoBranch] = useState<string>("branch-2");
+  const [activeServiceBranch, setActiveServiceBranch] = useState<"eluru" | "bhimavaram">("bhimavaram");
   const [isVideoMuted, setIsVideoMuted] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -137,9 +137,6 @@ const Index = () => {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/20" />
-
           {heroImages.length > 1 && (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-2">
               {heroImages.map((_, i) => (

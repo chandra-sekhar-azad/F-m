@@ -451,7 +451,7 @@ const BookingPage = () => {
     });
   };
 
-  const handlePayment = async () => {
+  const handlePayment = async (method: "razorpay" | "mock" = "razorpay") => {
     try {
       setPaymentLoading(true);
 
@@ -470,6 +470,21 @@ const BookingPage = () => {
       };
 
       const createdBooking = await api.createBooking(bookingData);
+
+      if (method === "mock") {
+        const payment = await api.processMockPayment(createdBooking.id, amountToPay, paymentType);
+        localStorage.removeItem('bookingState');
+        localStorage.removeItem('bookingStep');
+        navigate('/booking-confirmed', {
+          state: {
+            booking: payment.booking,
+            orderId: `mock-${createdBooking.id}`,
+            paymentId: 'mock-payment',
+          },
+          replace: true,
+        });
+        return;
+      }
 
       // Load Razorpay script
         const scriptLoaded = await loadRazorpayScript();
@@ -1143,6 +1158,16 @@ const BookingPage = () => {
                     >
                       {paymentLoading ? "Connecting..." : `Pay ₹${advanceAmount.toLocaleString()} Now`}
                     </button>
+
+                    {import.meta.env.DEV && (
+                      <button
+                        onClick={() => handlePayment('mock')}
+                        disabled={paymentLoading}
+                        className="w-full rounded-xl border border-dashed border-primary py-3 text-sm font-bold text-primary transition-colors hover:bg-primary/10 disabled:opacity-50 font-body"
+                      >
+                        {paymentLoading ? "Processing test payment..." : `Test payment ₹${advanceAmount.toLocaleString()}`}
+                      </button>
+                    )}
 
 
 

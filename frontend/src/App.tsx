@@ -28,17 +28,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Review = lazy(() => import("./pages/Review"));
 const UserReviews = lazy(() => import("./pages/User-reviews"));
 
-import { API_BASE } from "@/lib/api";
-
 const queryClient = new QueryClient();
-
-// Ping the backend every 10 minutes to prevent Render free tier spin-down
-const PING_INTERVAL = 10 * 60 * 1000;
-const pingServer = () => {
-  fetch(`${API_BASE}/health`, { method: "GET" })
-    .then(() => console.log("🟢 Server keep-alive ping sent"))
-    .catch(() => console.warn("⚠️ Keep-alive ping failed — server may be sleeping"));
-};
 
 const AppShell = () => {
   const location = useLocation();
@@ -89,13 +79,8 @@ const App = () => {
       fetchBranches();
     }, 5 * 60 * 1000);
 
-    // Keep Render server awake — ping immediately then every 10 minutes
-    pingServer();
-    const pingInterval = setInterval(pingServer, PING_INTERVAL);
-
     return () => {
       clearInterval(interval);
-      clearInterval(pingInterval);
     };
   }, []);
 

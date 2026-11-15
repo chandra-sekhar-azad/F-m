@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Phone } from "lucide-react";
+import { Menu, Phone, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { branchDetails } from "@/data/branch-details";
 
 const Navbar = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const eluru = branchDetails.find((branch) => branch.id === "branch-1")!;
   const bhimavaram = branchDetails.find((branch) => branch.id === "branch-2")!;
 
@@ -58,32 +60,46 @@ const Navbar = () => {
           <ThemeToggle />
         </div>
 
-        {/* Mobile toggle & Links */}
-        <div className="flex flex-1 items-center justify-end overflow-hidden ml-3 md:hidden">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-            {links.filter(l => !l.highlight).map((link) => (
+        {/* Mobile controls */}
+        <div className="flex items-center gap-1 md:hidden">
+          <Link
+            to="/booking"
+            className="shrink-0 rounded-full px-3 py-1.5 text-[11px] border border-black bg-white text-black glow-gold font-bold whitespace-nowrap"
+          >
+            Book Now
+          </Link>
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+            className="p-2 rounded-md hover:bg-white/10 transition-colors text-foreground"
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {isMobileMenuOpen && (
+        <div id="mobile-navigation" className="md:hidden border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+          <div className="container mx-auto flex flex-col gap-1">
+            {links.filter((link) => !link.highlight).map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`shrink-0 whitespace-nowrap text-[11px] font-medium transition-colors ${
-                  location.pathname === link.href ? "text-primary font-bold" : "text-foreground/80 hover:text-foreground"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  location.pathname === link.href ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/booking"
-              className="shrink-0 rounded-full px-3 py-1.5 text-[11px] border border-black bg-white text-black glow-gold font-bold whitespace-nowrap ml-1"
-            >
-              Book Now
-            </Link>
-            <div className="shrink-0">
-              <ThemeToggle />
-            </div>
           </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 };

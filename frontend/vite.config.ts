@@ -33,18 +33,14 @@ export default defineConfig(({ mode }) => ({
     // Split vendor libraries into separate chunks so browsers can cache them independently
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React runtime — cached aggressively, rarely changes
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          // UI component library
-          "vendor-ui": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-select",
-            "@radix-ui/react-tabs",
-          ],
-          // Icons — large package, worth isolating
-          "vendor-icons": ["lucide-react"],
+        // Rolldown (used by Vite 8) accepts a function here. Keep the same
+        // cacheable vendor chunks that were previously declared as an object.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (/(?:react|react-dom|react-router-dom)\//.test(id)) return "vendor-react";
+          if (id.includes("@radix-ui")) return "vendor-ui";
+          if (id.includes("lucide-react")) return "vendor-icons";
+          return undefined;
         },
       },
     },

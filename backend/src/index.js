@@ -29,7 +29,8 @@ app.use(express.static(publicDir));
 
 // Middleware
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight requests
+// Express 5 requires named wildcard parameters. This form also matches `/`.
+app.options('/{*splat}', cors(corsOptions)); // Handle preflight requests
 app.use(express.json({ limit: '20mb' }));
 
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -59,7 +60,7 @@ app.get('/api/debug/bookings-count', async (req, res) => {
 });
 
 // SPA fallback — all non-API routes serve the React app
-app.get('*', (req, res) => {
+app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 

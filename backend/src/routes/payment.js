@@ -206,7 +206,7 @@ const updateBookingPayment = async (bookingId, amountPaid, paymentType, paymentM
     const totalPrice = Number(booking.totalPrice); const newStatus = amt >= totalPrice ? 'paid' : 'partially-paid';
     const [saved] = await db.update(bookings).set({ paymentStatus: newStatus, amountPaid: String(amt), balanceAmount: String(Math.max(0, totalPrice - amt)), paymentType: resolvedPaymentType || (amt >= totalPrice ? 'full' : 'advance'), paymentMode: paymentMode || booking.paymentMode, updatedAt: new Date() }).where(eq(bookings.id, bookingId)).returning();
     const output = { ...saved, totalPrice: Number(saved.totalPrice), amountPaid: Number(saved.amountPaid), balanceAmount: Number(saved.balanceAmount) };
-    if (newStatus !== booking.paymentStatus) sendPaymentNotifications(output);
+    if (paymentMode !== 'mock' && newStatus !== booking.paymentStatus) sendPaymentNotifications(output);
     return output;
   } finally { await client.end({ timeout: 5 }); }
 };
@@ -223,6 +223,25 @@ router.post('/process', async (req, res) => {
   } catch (error) {
     console.error('Error processing payment:', error);
     res.status(500).json({ error: 'Failed to process payment' });
+  }
+});
+
+// Development-only payment shortcut. Never expose this route in staging or production.
+router.post('/mock', async (req, res) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  const { bookingId, amountPaid, paymentType } = req.body;
+  if (!bookingId) return res.status(400).json({ error: 'bookingId is required' });
+
+  try {
+    const booking = await updateBookingPayment(bookingId, amountPaid, paymentType, 'mock');
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    res.json({ success: true, test: true, message: 'Mock payment processed', booking });
+  } catch (error) {
+    console.error('Mock payment error:', error);
+    res.status(500).json({ error: 'Failed to process mock payment' });
   }
 });
 

@@ -1,31 +1,19 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { api, type Branch } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useSearchParams } from "react-router-dom";
+import { branchDetails } from "@/data/branch-details";
 
 const GalleryPage = () => {
   const [searchParams] = useSearchParams();
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string>(searchParams.get("branch") || "branch-1");
   const [loading, setLoading] = useState(true);
 
   const [galleryImages, setGalleryImages] = useState<
     { id: string; src: string; alt: string; title: string; date: string }[]
   >([]);
-
-  useEffect(() => {
-    const loadBranches = async () => {
-      try {
-        const data = await api.getBranches();
-        setBranches(data);
-      } catch (error) {
-        console.error("Failed to load branches:", error);
-      }
-    };
-    loadBranches();
-  }, []);
 
   useEffect(() => {
     const loadGallery = async () => {
@@ -77,9 +65,9 @@ const GalleryPage = () => {
               onChange={(e) => setSelectedBranch(e.target.value)}
               className="rounded-full border border-border bg-muted px-6 py-3 text-m font-semibold text-foreground focus:border-primary focus:outline-none transition-all hover:border-primary/50"
             >
-              {branches.map((branch) => (
+              {branchDetails.map((branch) => (
                 <option key={branch.id} value={branch.id}>
-                  {branch.id === "branch-1" ? "ELURU" : branch.id === "branch-2" ? "BHIMAVARAM" : branch.name}
+                  {branch.name.split("-")[1]?.trim() || branch.name}
                 </option>
               ))}
             </select>

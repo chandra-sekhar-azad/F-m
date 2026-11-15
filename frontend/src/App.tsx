@@ -17,7 +17,6 @@ const BookingPage = lazy(() => import("./pages/BookingPage"));
 const BookingConfirmed = lazy(() => import("./pages/BookingConfirmed"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminPricing = lazy(() => import("./pages/AdminPricing"));
-const ContactPage = lazy(() => import("./pages/ContactPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const Reels = lazy(() => import("./pages/reels"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
@@ -62,7 +61,7 @@ const AppShell = () => {
           <Route path="/booking-confirmed" element={<BookingConfirmed />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/pricing" element={<AdminPricing />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/contact" element={<Navigate to="/about#contact" replace />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />

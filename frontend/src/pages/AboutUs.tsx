@@ -1,6 +1,6 @@
-import React from "react";
-import { Sparkles, MapPin, Phone, Mail } from "lucide-react";
+import { Sparkles, MapPin, Phone, Mail, Instagram, MessageCircle } from "lucide-react";
 import heroImg from "@/assets/hero-theatre.jpg";
+import { branchDetails } from "@/data/branch-details";
 
 const AboutUs = () => {
   return (
@@ -85,6 +85,31 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
+
+        <section id="contact" className="mt-16 scroll-mt-28 border-t border-border pt-16">
+          <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.3em] text-primary">Get in Touch</p>
+          <h2 className="mb-4 text-center font-display text-3xl font-bold text-foreground md:text-4xl">
+            Contact <span className="text-gradient-gold">Us</span>
+          </h2>
+          <p className="mb-10 text-center text-sm text-muted-foreground">Find contact and social details for each branch.</p>
+
+          <div className="grid gap-8 md:grid-cols-2">
+              {branchDetails.map((branch) => (
+                <div key={branch.id} className="rounded-2xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:glow-gold">
+                  <h3 className="mb-6 font-display text-2xl font-bold text-gradient-gold">{branch.name}</h3>
+                  <div className="space-y-5 text-sm text-muted-foreground">
+                    <a href={branch.mapLink} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 transition-colors hover:text-primary"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><span>{branch.address}</span></a>
+                    <a href={`tel:${branch.phone.replace(/\s/g, "")}`} className="flex items-center gap-3 transition-colors hover:text-primary"><Phone className="h-5 w-5 text-primary" /><span>{branch.phone}</span></a>
+                    <a href={`mailto:${branch.email}`} className="flex items-center gap-3 transition-colors hover:text-primary"><Mail className="h-5 w-5 text-primary" /><span>{branch.email}</span></a>
+                    <div className="flex gap-4 border-t border-border/50 pt-5">
+                      {branch.instagram && <a href={branch.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${branch.name} on Instagram`} className="rounded-full border border-border p-3 transition-all hover:border-primary hover:text-primary"><Instagram className="h-5 w-5" /></a>}
+                      <a href={`https://wa.me/${branch.whatsapp.replace(/\+/g, "").replace(/\s/g, "")}`} target="_blank" rel="noopener noreferrer" aria-label={`Message ${branch.name} on WhatsApp`} className="rounded-full border border-border p-3 transition-all hover:border-[#25D366] hover:text-[#25D366]"><MessageCircle className="h-5 w-5" /></a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </section>
       </div>
     </div>
   );

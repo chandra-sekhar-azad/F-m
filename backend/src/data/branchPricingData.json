@@ -135,7 +135,7 @@
       {
         "id": "prime",
         "name": "Prime Screen",
-        "bookingsEnabled": true
+        "bookingsEnabled": false
       },
       {
         "id": "private",
@@ -312,6 +312,6 @@
       "facebook": "https://facebook.com",
       "whatsapp": ""
     },
-    "bookingsEnabled": true
+    "bookingsEnabled": false
   }
 }

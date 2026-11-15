@@ -2,22 +2,48 @@ import { ArrowRight, Play, Phone, MapPin, Star, Sparkles, Instagram, Facebook, T
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 const heroImg = "/hero-theatre.jpg";
-import partyImg from "@/assets/party-hall.jpg";
-import theatreImg from "@/assets/private-theatre.jpg";
-import { api, type Branch, type BranchVideo } from "@/lib/api";
+import { api, type BranchVideo } from "@/lib/api";
 import ReviewSection from "@/components/ReviewSection";
+import { branchDetails } from "@/data/branch-details";
+
+// Demo content for the branch-specific service cards. Update these details as needed.
+const serviceCardsByBranch = {
+  eluru: [
+    {
+      id: "eluru-private-theatre",
+      img: heroImg,
+      title: "Eluru Private Theatre",
+      desc: "Demo description for the Eluru private theatre experience. Replace this with your branch details.",
+      features: ["Demo feature one", "Demo feature two", "Demo feature three", "Demo feature four"],
+    },
+  ],
+  bhimavaram: [
+    {
+      id: "bhimavaram-private-theatre",
+      img: heroImg,
+      title: "Prime Bhimavaram",
+      desc: "Large Screen Private Theatre in Bhimavaram. Perfect for birthdays, anniversaries, and movie nights with friends.",
+      features: ["14 Seating Capacity", "4K Projection & Dolby Sound", "Decoration included", "Air Conditioned"],
+    },
+    {
+      id: "bhimavaram-party-hall",
+      img: heroImg,
+      title: "Private Bhimavaram",
+      desc: "Mini Screen Private Theatre in Bhimavaram. Ideal for intimate gatherings, proposals, and family celebrations.",
+      features: ["3 Seating Capacity", "HD Projection & Dolby Sound", "Decoration included", "Air Conditioned"],
+    },
+  ],
+};
 
 
 
 const Index = () => {
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [heroImages, setHeroImages] = useState<string[]>([heroImg]);
-  const [branchSocials, setBranchSocials] = useState<Record<string, any>>({});
   const [currentHero, setCurrentHero] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [branchVideos, setBranchVideos] = useState<Record<string, BranchVideo[]>>({});
   const [brokenVideoIds, setBrokenVideoIds] = useState<Record<string, true>>({});
   const [activeVideoBranch, setActiveVideoBranch] = useState<string>("branch-1");
+  const [activeServiceBranch, setActiveServiceBranch] = useState<"eluru" | "bhimavaram">("eluru");
   const [isVideoMuted, setIsVideoMuted] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -26,26 +52,13 @@ const Index = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [bData, hData] = await Promise.all([
-          api.getBranches(),
-          api.getHeroImages("branch-1") // Default to branch-1 for home page carousel
-        ]);
-        setBranches(bData);
+        const hData = await api.getHeroImages("branch-1");
         setHeroImages(hData.length > 0 ? hData : [heroImg]); // Fallback to static if empty
 
-        // Fetch socials and videos for all branches
-        const socialPromises = bData.map(async (b) => {
-          const s = await api.getSocialLinks(b.id);
-          return { id: b.id, ...s };
-        });
-        const allSocials = await Promise.all(socialPromises);
-        const socialMap = allSocials.reduce((acc, s) => ({ ...acc, [s.id]: s }), {});
-        setBranchSocials(socialMap);
-
         // Fetch videos per branch
-        const videoPromises = bData.map(async (b) => {
-          const vids = await api.getBranchVideos(b.id).catch(() => []);
-          return { id: b.id, vids };
+        const videoPromises = branchDetails.map(async (branch) => {
+          const vids = await api.getBranchVideos(branch.id).catch(() => []);
+          return { id: branch.id, vids };
         });
         const allVideos = await Promise.all(videoPromises);
         const videoMap = allVideos.reduce((acc, { id, vids }) => ({ ...acc, [id]: vids }), {});
@@ -53,8 +66,6 @@ const Index = () => {
       } catch (error) {
         console.error("Failed to load home data:", error);
         setHeroImages([heroImg]);
-      } finally {
-        setLoading(false);
       }
     };
     loadData();
@@ -144,6 +155,7 @@ const Index = () => {
         </div>
 
         <div className="container relative z-10 mx-auto px-4 pt-32 pb-12 md:pt-24 md:pb-0">
+          <div className="absolute -top-10 -left-10 w-72 h-72 bg-primary/10 rounded-full blur-[100px] pointer-events-none -z-10" />
           <div className="mb-4 flex flex-wrap items-center gap-3 animate-fade-in">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/20">
               <Sparkles className="h-3 w-3" /> Celebrating 2 Years
@@ -153,7 +165,7 @@ const Index = () => {
             </p>
           </div>
           <h1 className="mb-6 max-w-4xl 3xl:max-w-6xl font-display text-4xl font-bold leading-tight text-foreground md:text-7xl 3xl:text-9xl animate-slide-up">
-            Best <span className="text-orange-500">Private Theatre</span> & Party Hall
+            Best <span className="text-gradient-gold">Private Theatre</span> & Party Hall
           </h1>
           <p className="mb-8 md:mb-10 max-w-xl 3xl:max-w-4xl text-base md:text-lg 3xl:text-3xl leading-relaxed text-muted-foreground font-body animate-slide-up delay-100">
             Book the <strong>best private theatre in Eluru</strong> or a <strong>premium private theatre in Bhimavaram</strong> for birthdays, anniversaries, proposals, or just a night out with friends. Affordable packages with custom decorations and cake.
@@ -161,28 +173,25 @@ const Index = () => {
           <div className="flex flex-wrap items-center gap-4 animate-slide-up delay-200">
             <Link
               to="/booking"
-              className="inline-flex items-center gap-2 rounded-full border border-black bg-white px-8 py-4 text-[36px] font-bold text-black transition-all hover:scale-105 glow-gold font-body"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:scale-105 glow-gold font-body"
             >
               Book Now <ArrowRight className="h-4 w-4" />
             </Link>
             <a
               href="#services"
-              className="inline-flex items-center gap-2 rounded-full border border-border px-8 py-4 text-[30px] font-medium text-foreground transition-colors hover:border-primary font-body"
+              className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/60 backdrop-blur-sm px-6 py-2.5 text-sm font-medium text-foreground transition-all hover:border-primary hover:text-primary font-body"
             >
               <Play className="h-4 w-4" /> View Services
             </a>
           </div>
-          {branches.length > 0 && (
-            <a href={`tel:${branches[0].phone}`} className="mt-8 inline-flex items-center gap-2 text-sm text-muted-foreground font-body hover:text-primary transition-colors">
-              <Phone className="h-4 w-4 text-primary" /> Call us: {branches[0].phone}
+          <a href={`tel:${branchDetails[0].phone.replace(/\s/g, "")}`} className="mt-8 inline-flex items-center gap-2 text-sm text-muted-foreground font-body hover:text-primary transition-colors">
+              <Phone className="h-4 w-4 text-primary" /> Call us: {branchDetails[0].phone}
             </a>
-          )}
         </div>
       </section>
 
       {/* Branch Videos — Switch between branches */}
-      {branches.length > 0 && (
-        <section ref={videoSectionRef} id="venue-videos" className="py-4 border-b border-border bg-muted/20">
+      <section ref={videoSectionRef} id="venue-videos" className="py-4 border-b border-border bg-muted/20">
           <div className="container mx-auto px-4">
             <div className="mb-4 flex justify-end">
               <Link
@@ -204,12 +213,29 @@ const Index = () => {
             <div className="flex items-center justify-center mb-10">
               <div className="relative flex items-center rounded-full bg-muted/60 border border-border p-1 gap-1 shadow-inner">
                 {/* Sliding background pill */}
-                <span
-                  aria-hidden="true"
-                  className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full bg-gradient-gold shadow-md transition-transform duration-300 ease-in-out ${activeVideoBranch === "branch-2" ? "translate-x-[calc(100%+4px)]" : "translate-x-0"
+              <span
+                aria-hidden="true"
+                className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full bg-gradient-gold shadow-md transition-transform duration-300 ease-in-out ${activeVideoBranch === "branch-1" ? "translate-x-[calc(100%+4px)]" : "translate-x-0"
                     }`}
-                />
-                {/* Branch 1 button */}
+              />
+              {/* Bhimavaram button */}
+                <button
+                  role="radio"
+                aria-checked={activeVideoBranch === "branch-2"}
+                  onClick={() => {
+                    setActiveVideoBranch("branch-2");
+                    setIsVideoMuted(true);
+                    if (videoRef.current) videoRef.current.pause();
+                  }}
+                  className={`relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold font-body transition-colors duration-300 focus:outline-none ${activeVideoBranch === "branch-2"
+                      ? "text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  {branchDetails.find((branch) => branch.id === "branch-2")?.name.split("-")[1]?.trim() || "Bhimavaram"}
+                </button>
+                {/* Eluru button */}
                 <button
                   role="radio"
                   aria-checked={activeVideoBranch === "branch-1"}
@@ -224,31 +250,14 @@ const Index = () => {
                     }`}
                 >
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  {branches.find(b => b.id === "branch-1")?.name?.split("-")[1]?.trim() || "Eluru"}
-                </button>
-                {/* Branch 2 button */}
-                <button
-                  role="radio"
-                  aria-checked={activeVideoBranch === "branch-2"}
-                  onClick={() => {
-                    setActiveVideoBranch("branch-2");
-                    setIsVideoMuted(true);
-                    if (videoRef.current) videoRef.current.pause();
-                  }}
-                  className={`relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold font-body transition-colors duration-300 focus:outline-none ${activeVideoBranch === "branch-2"
-                      ? "text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                    }`}
-                >
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  {branches.find(b => b.id === "branch-2")?.name?.split("-")[1]?.trim() || "Bhimavaram"}
+                  {branchDetails.find((branch) => branch.id === "branch-1")?.name.split("-")[1]?.trim() || "Eluru"}
                 </button>
               </div>
             </div>
 
             {/* Video Card */}
             {(() => {
-              const activeBranch = branches.find(b => b.id === activeVideoBranch);
+              const activeBranch = branchDetails.find((branch) => branch.id === activeVideoBranch);
               const videos = (branchVideos[activeVideoBranch] || []).filter((item) => !brokenVideoIds[item.id]);
 
               if (!activeBranch) return null;
@@ -298,7 +307,6 @@ const Index = () => {
             })()}
           </div>
         </section>
-      )}
 
       {/* Services */}
       <section id="services" className="py-4">
@@ -307,12 +315,42 @@ const Index = () => {
           <h2 className="mb-16 text-center font-display text-4xl font-bold text-foreground md:text-5xl">
             Choose Your <span className="text-gradient-gold">Experience</span>
           </h2>
-          <div className="mx-auto grid max-w-2xl gap-8 md:grid-cols-1">
-            {[
-              { id: "private-theatre-party-hall", img: heroImg, title: "Private Theatre + Party Hall", desc: "Experience the ultimate celebration with our combined premium private theatre and elegant party hall service.", features: ["1000+ happy customers", "4K Projection & Dolby Sound", "Decorations included", "Recliner seating & AC"] },
-            ].map((service) => (
+
+          <div className="mb-10 flex justify-center">
+            <div
+              role="radiogroup"
+              aria-label="Choose a branch for services"
+              className="relative grid w-full max-w-sm grid-cols-2 rounded-full border border-border bg-muted/60 p-1 shadow-inner"
+            >
+              <span
+                aria-hidden="true"
+                className={`absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-gradient-gold shadow-md transition-transform duration-300 ease-in-out ${activeServiceBranch === "eluru" ? "translate-x-full" : "translate-x-0"}`}
+              />
+              <button
+                type="button"
+                role="radio"
+                aria-checked={activeServiceBranch === "bhimavaram"}
+                onClick={() => setActiveServiceBranch("bhimavaram")}
+                className={`relative z-10 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeServiceBranch === "bhimavaram" ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Bhimavaram
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={activeServiceBranch === "eluru"}
+                onClick={() => setActiveServiceBranch("eluru")}
+                className={`relative z-10 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeServiceBranch === "eluru" ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Eluru
+              </button>
+            </div>
+          </div>
+
+          <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
+            {serviceCardsByBranch[activeServiceBranch].map((service) => (
               <div
-                key={service.title}
+                key={service.id}
                 className="group overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/50 hover:glow-gold"
               >
                 <div className="relative h-80 overflow-hidden">
@@ -322,7 +360,7 @@ const Index = () => {
                 <div className="p-8">
                   <h3 className="mb-3 font-display text-3xl font-bold text-gradient-gold">{service.title}</h3>
                   <p className="mb-5 text-sm leading-relaxed text-muted-foreground font-body">
-                    Looking for a <strong>private party theatre in Bhimavaram</strong> or a <strong>private theatre with cake in Eluru</strong>? Our combined pack offers the perfect celebration space for any occasion.
+                    {service.desc}
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 mb-8">
                     {service.features.map((f) => (
@@ -332,7 +370,7 @@ const Index = () => {
                     ))}
                   </div>
                   <Link
-                    to={`/booking?service=${service.id}`}
+                    to={`/booking?branch=${activeServiceBranch === "eluru" ? "branch-1" : "branch-2"}&service=${service.id}`}
                     className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-8 py-4 text-sm font-semibold text-primary-foreground transition-all hover:scale-105 font-body w-full justify-center"
                   >
                     Check Availability & Book Now <ArrowRight className="h-4 w-4" />
@@ -351,17 +389,14 @@ const Index = () => {
           <h2 className="mb-16 text-center font-display text-4xl font-bold text-foreground md:text-5xl">
             Our <span className="text-gradient-gold">Branches</span>
           </h2>
-          {loading ? (
-            <div className="text-center text-muted-foreground font-body">Loading branches...</div>
-          ) : (
-            <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-              {branches.map((branch) => (
+          <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+              {branchDetails.map((branch) => (
                 <div key={branch.id} className="rounded-2xl border border-border bg-card p-8 transition-all hover:border-primary">
                   <h3 className="mb-4 font-display text-xl font-bold text-foreground">{branch.name}</h3>
                   <div className="space-y-3 text-sm text-muted-foreground font-body">
-                    <p className="flex items-start gap-2">
+                    <a href={branch.mapLink} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2 transition-colors hover:text-primary">
                       <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {branch.address}
-                    </p>
+                    </a>
                     <p className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-primary" /> {branch.phone}
                     </p>
@@ -374,8 +409,7 @@ const Index = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -424,24 +458,23 @@ const Index = () => {
             <p className="font-display text-3xl font-bold text-gradient-gold italic">Friends & Memories</p>
 
             <div className="grid gap-10 md:grid-cols-2 mt-8 w-full">
-              {branches.map((branch) => {
-                const socials = branchSocials[branch.id] || { instagram: "", facebook: "", whatsapp: "" };
+              {branchDetails.map((branch) => {
                 return (
                   <div key={branch.id} className="text-center space-y-3">
                     <p className="text-xs font-bold uppercase tracking-widest text-primary font-body">{branch.name.split("-")[1]?.trim() || branch.name}</p>
                     <div className="flex justify-center items-center gap-4">
-                      {socials.instagram && (
-                        <a href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-3 rounded-full border border-border text-muted-foreground transition-all hover:border-primary hover:text-primary hover:glow-gold">
+                      {branch.instagram && (
+                        <a href={branch.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-3 rounded-full border border-border text-muted-foreground transition-all hover:border-primary hover:text-primary hover:glow-gold">
                           <Instagram className="h-5 w-5" />
                         </a>
                       )}
-                      {socials.facebook && (
-                        <a href={socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-3 rounded-full border border-border text-muted-foreground transition-all hover:border-primary hover:text-primary hover:glow-gold">
+                      {branch.facebook && (
+                        <a href={branch.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-3 rounded-full border border-border text-muted-foreground transition-all hover:border-primary hover:text-primary hover:glow-gold">
                           <Facebook className="h-5 w-5" />
                         </a>
                       )}
                       <a
-                        href={`https://wa.me/91${(socials.whatsapp || branch.phone).replace(/\+/g, "").replace(/\s/g, "")}`}
+                        href={`https://wa.me/${branch.whatsapp.replace(/\+/g, "").replace(/\s/g, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="WhatsApp"
@@ -460,7 +493,7 @@ const Index = () => {
               <Link to="/about" className="hover:text-primary">About Us</Link>
               <Link to="/gallery" className="hover:text-primary">Gallery</Link>
               <Link to="/booking" className="hover:text-primary">Booking</Link>
-              <Link to="/contact" className="hover:text-primary">Contact</Link>
+              <Link to="/about#contact" className="hover:text-primary">Contact</Link>
             </div>
 
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] uppercase tracking-widest text-muted-foreground/60 font-body">

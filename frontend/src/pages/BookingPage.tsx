@@ -8,6 +8,7 @@ import {
 import { api, API_BASE, Branch, CakeOption, ExtraDecoration } from "../lib/api";
 import { BookingData, INITIAL_BOOKING, DECORATION_PRICE } from "../lib/booking-data";
 import { getEffectivePrice, getOriginalPrice, hasOffer } from "../lib/utils";
+import { branchDetails } from "@/data/branch-details";
 
 const formatServiceName = (serviceId: string) => {
   if (serviceId === "private-theatre-party-hall") return "Standard Pack";
@@ -708,7 +709,7 @@ const BookingPage = () => {
                               </div>
                               <div>
                                 <p className="font-bold text-foreground text-xs md:text-base font-body leading-tight">
-                                  {b.name.split("-")[1]?.trim() || b.name}
+                                  {branchDetails.find((branch) => branch.id === b.id)?.name.split("-")[1]?.trim() || b.name}
                                 </p>
                                 {booking.branch === b.id && !isPaused && (
                                   <span className="text-[9px] md:text-[10px] font-semibold text-primary uppercase tracking-wide block mt-1">Selected ✓</span>
@@ -987,7 +988,7 @@ const BookingPage = () => {
               {step === 5 && (
                 <div className="space-y-4">
                   {[
-                    { label: "Branch", value: branches.find((b) => b.id === booking.branch)?.name },
+                    { label: "Branch", value: branchDetails.find((branch) => branch.id === booking.branch)?.name || booking.branch },
                     ...(booking.hall ? [{ label: "Hall", value: halls.find(h => h.id === booking.hall)?.name || booking.hall }] : []),
                     { label: "Service", value: formatServiceName(booking.service || "") },
                     { label: "Date", value: booking.date },

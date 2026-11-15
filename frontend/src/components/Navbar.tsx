@@ -1,16 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
 import { Phone } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { branchDetails } from "@/data/branch-details";
 
 const Navbar = () => {
   const location = useLocation();
+  const eluru = branchDetails.find((branch) => branch.id === "branch-1")!;
+  const bhimavaram = branchDetails.find((branch) => branch.id === "branch-2")!;
 
   const links = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
     { href: "/about", label: "About" },
     { href: "/booking", label: "Book Now", highlight: true },
-    { href: "/contact", label: "Contact" },
   ];
 
   return (
@@ -44,13 +46,13 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="flex flex-col gap-0.5 ml-2 border-l border-border pl-4">
-            <a href="tel:+917680006662" className="flex items-center gap-2 lg:gap-3 text-[10px] lg:text-xs 3xl:text-lg text-foreground hover:text-primary transition-colors whitespace-nowrap">
+            <a href={`tel:${eluru.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 lg:gap-3 text-[10px] lg:text-xs 3xl:text-lg text-foreground hover:text-primary transition-colors whitespace-nowrap">
               <Phone className="h-2.5 w-2.5 lg:h-3 lg:w-3 3xl:h-5 3xl:w-5" />
-              <span className="font-semibold opacity-70">Eluru:</span> +91 76800 06662
+              <span className="font-semibold opacity-70">Eluru:</span> {eluru.phone}
             </a>
-            <a href="tel:+919912710932" className="flex items-center gap-2 lg:gap-3 text-[10px] lg:text-xs 3xl:text-lg text-foreground hover:text-primary transition-colors whitespace-nowrap">
+            <a href={`tel:${bhimavaram.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 lg:gap-3 text-[10px] lg:text-xs 3xl:text-lg text-foreground hover:text-primary transition-colors whitespace-nowrap">
               <Phone className="h-2.5 w-2.5 lg:h-3 lg:w-3 3xl:h-5 3xl:w-5" />
-              <span className="font-semibold opacity-70">Bhimavaram:</span> +91 99127 10932
+              <span className="font-semibold opacity-70">Bhimavaram:</span> {bhimavaram.phone}
             </a>
           </div>
           <ThemeToggle />

@@ -193,9 +193,6 @@ const AdminDashboard = () => {
   const [previewBranch, setPreviewBranch] = useState<"branch-1" | "branch-2">("branch-1");
   const [manualAvailableSlots, setManualAvailableSlots] = useState<string[]>([]);
   const [manualBookedSlots, setManualBookedSlots] = useState<string[]>([]);
-  const [branchEditData, setBranchEditData] = useState({ name: "", address: "", phone: "", mapLink: "" });
-  const [socialEditData, setSocialEditData] = useState({ instagram: "", facebook: "", whatsapp: "" });
-  const [savingBranch, setSavingBranch] = useState(false);
   const [bookingsEnabled, setBookingsEnabled] = useState(true);
   const [togglingBookings, setTogglingBookings] = useState(false);
   const [branchList, setBranchList] = useState<any[]>([]);
@@ -460,29 +457,20 @@ const AdminDashboard = () => {
       setDecorationPrice(decorationPriceData);
 
       // Fetch gallery data independently so one failure doesn't block others
-      const [testimonialsData, heroImagesData, branchVideosData, socialData, bList] = await Promise.allSettled([
+      const [testimonialsData, heroImagesData, branchVideosData, bList] = await Promise.allSettled([
         api.getTestimonials(selectedBranch),
         api.getHeroImages(selectedBranch),
         api.getBranchVideos(selectedBranch),
-        api.getSocialLinks(selectedBranch),
         api.getBranches(),
       ]);
 
       if (testimonialsData.status === "fulfilled") setTestimonials(testimonialsData.value);
       if (heroImagesData.status === "fulfilled") setHeroImages(heroImagesData.value);
       if (branchVideosData.status === "fulfilled") setBranchVideos(branchVideosData.value);
-      if (socialData.status === "fulfilled") setSocialEditData(socialData.value);
-
       if (bList.status === "fulfilled") {
         setBranchList(bList.value);
         const currentBranch = bList.value.find((b: any) => b.id === selectedBranch);
         if (currentBranch) {
-          setBranchEditData({
-            name: currentBranch.name,
-            address: currentBranch.address,
-            phone: currentBranch.phone,
-            mapLink: currentBranch.mapLink || ""
-          });
           setBookingsEnabled(currentBranch.bookingsEnabled !== false);
         }
       }
@@ -515,23 +503,6 @@ const AdminDashboard = () => {
       setError("Failed to update bookings status");
     } finally {
       setTogglingBookings(false);
-    }
-  };
-
-  const handleSaveBranchDetails = async () => {    if (!token) return;
-    try {
-      setSavingBranch(true);
-      await Promise.all([
-        api.updateBranch(token, selectedBranch, branchEditData),
-        api.updateSocialLinks(token, selectedBranch, socialEditData)
-      ]);
-      await fetchPricing(); // Refresh data
-      alert("Branch & Social details updated successfully!");
-    } catch (error) {
-      console.error("Error saving branch details:", error);
-      setError("Failed to update branch details");
-    } finally {
-      setSavingBranch(false);
     }
   };
 
@@ -2987,101 +2958,6 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            {/* Branch Details Card */}
-            <div className="rounded-2xl border border-border bg-card p-8 space-y-6">
-              <h2 className="font-display text-2xl font-bold text-foreground">
-                Settings for {branchList.find((b) => b.id === selectedBranch)?.name || "Branch"}
-              </h2>
-              <p className="text-sm text-muted-foreground font-body">
-                Update the contact information, address, and social handles for this specific location.
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Branch Name</label>
-                  <input
-                    type="text"
-                    value={branchEditData.name}
-                    onChange={(e) => setBranchEditData({ ...branchEditData, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Contact Phone</label>
-                  <input
-                    type="text"
-                    value={branchEditData.phone}
-                    onChange={(e) => setBranchEditData({ ...branchEditData, phone: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Physical Address</label>
-                  <textarea
-                    value={branchEditData.address}
-                    onChange={(e) => setBranchEditData({ ...branchEditData, address: e.target.value })}
-                    rows={3}
-                    className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Google Maps Link</label>
-                  <input
-                    type="text"
-                    value={branchEditData.mapLink}
-                    onChange={(e) => setBranchEditData({ ...branchEditData, mapLink: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                  />
-                </div>
-
-                <div className="pt-4 border-t border-border mt-4">
-                  <h3 className="text-sm font-bold text-foreground mb-4 font-display">Social Media Links</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Instagram URL</label>
-                      <input
-                        type="text"
-                        value={socialEditData.instagram}
-                        onChange={(e) => setSocialEditData({ ...socialEditData, instagram: e.target.value })}
-                        placeholder="https://instagram.com/your-profile"
-                        className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Facebook URL</label>
-                      <input
-                        type="text"
-                        value={socialEditData.facebook}
-                        onChange={(e) => setSocialEditData({ ...socialEditData, facebook: e.target.value })}
-                        placeholder="https://facebook.com/your-page"
-                        className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">WhatsApp Number (Optional)</label>
-                      <input
-                        type="text"
-                        value={socialEditData.whatsapp}
-                        onChange={(e) => setSocialEditData({ ...socialEditData, whatsapp: e.target.value })}
-                        placeholder="99127XXXXX (Leave empty for branch phone)"
-                        className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleSaveBranchDetails}
-                disabled={savingBranch}
-                className="w-full rounded-xl bg-gradient-gold py-4 text-sm font-bold text-primary-foreground transition-all hover:scale-[1.02] disabled:opacity-50"
-              >
-                {savingBranch ? "Saving Changes..." : "Update Branch Details"}
-              </button>
-            </div>
           </div>
         )}
       </div>

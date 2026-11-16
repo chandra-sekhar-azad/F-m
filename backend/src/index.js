@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url';
 import { createPostgresClient } from './db/client.js';
 import { bookings } from './db/schema.js';
 import { sql } from 'drizzle-orm';
-import { startCronJobs } from './utils/cron.js';
 
 // Route Imports
 import adminRoutes from './routes/admin/index.js';
@@ -77,6 +76,4 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
   console.log(`PORT env: ${process.env.PORT}`);
 });
-
-startCronJobs();
  

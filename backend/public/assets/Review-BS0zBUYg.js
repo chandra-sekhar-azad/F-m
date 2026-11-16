@@ -1,0 +1,1 @@
+import{n as e}from"./index-Dnr10qRM.js";import{pt as t}from"./vendor-react-_kWll9_F.js";var n=t(),r=()=>(0,n.jsx)(`div`,{className:`min-h-screen bg-[#0a0a0a] pt-20`,children:(0,n.jsx)(e,{showReviews:!1})});export{r as default};

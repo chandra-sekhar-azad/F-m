@@ -4,50 +4,51 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 30 10% 8%;
+    /* Light theme: 70% white, 20% orange (#FF591F), 10% near-black (#080604). */
+    --background: 0 0% 100%;
+    --foreground: 30 33.333% 2.353%;
 
     --card: 0 0% 100%;
-    --card-foreground: 30 10% 8%;
+    --card-foreground: 30 33.333% 2.353%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 30 10% 8%;
+    --popover-foreground: 30 33.333% 2.353%;
 
-    --primary: 38 80% 55%;
-    --primary-foreground: 30 10% 8%;
+    --primary: 15.5 100% 56.078%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 20% 90%;
-    --secondary-foreground: 30 10% 8%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 30 33.333% 2.353%;
 
-    --muted: 40 20% 92%;
-    --muted-foreground: 30 10% 40%;
+    --muted: 0 0% 97%;
+    --muted-foreground: 30 33% 20%;
 
-    --accent: 40 20% 90%;
-    --accent-foreground: 30 10% 8%;
+    --accent: 16 100% 96%;
+    --accent-foreground: 30 33.333% 2.353%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 30 8% 85%;
-    --input: 30 8% 85%;
-    --ring: 38 80% 55%;
+    --border: 30 33% 86%;
+    --input: 30 33% 86%;
+    --ring: 15.5 100% 56.078%;
 
     --radius: 0.75rem;
 
-    --gold: 38 80% 45%;
-    --gold-light: 38 70% 60%;
-    --gold-dark: 38 90% 30%;
-    --purple-glow: 270 60% 70%;
-    --purple-deep: 270 40% 30%;
+    --gold: 15.5 100% 56.078%;
+    --gold-light: 16 100% 65%;
+    --gold-dark: 16 100% 45%;
+    --purple-glow: 16 100% 65%;
+    --purple-deep: 30 33.333% 2.353%;
 
-    --sidebar-background: 40 20% 98%;
-    --sidebar-foreground: 30 10% 8%;
-    --sidebar-primary: 38 80% 55%;
-    --sidebar-primary-foreground: 30 10% 8%;
-    --sidebar-accent: 40 20% 90%;
-    --sidebar-accent-foreground: 30 10% 8%;
-    --sidebar-border: 30 8% 85%;
-    --sidebar-ring: 38 80% 55%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 30 33.333% 2.353%;
+    --sidebar-primary: 15.5 100% 56.078%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 16 100% 96%;
+    --sidebar-accent-foreground: 30 33.333% 2.353%;
+    --sidebar-border: 30 33% 86%;
+    --sidebar-ring: 15.5 100% 56.078%;
 
     --font-display: 'Playfair Display', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
@@ -108,6 +109,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary)) hsl(var(--muted));
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -115,7 +118,30 @@
   }
 }
 
+/* Slim orange scrollbar for Chromium/Safari browsers. */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--muted));
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--gold-dark));
+}
+
 @layer utilities {
+  .navbar-marquee {
+    animation: navbar-marquee-scroll 18s linear infinite;
+  }
+
   .text-gradient-gold {
     background: linear-gradient(135deg, hsl(var(--gold-light)), hsl(var(--gold)), hsl(var(--gold-dark)));
     -webkit-background-clip: text;
@@ -138,4 +164,13 @@
   .glow-purple {
     box-shadow: 0 0 40px hsl(var(--purple-glow) / 0.3);
   }
+}
+
+@keyframes navbar-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-marquee { animation: none; }
 }

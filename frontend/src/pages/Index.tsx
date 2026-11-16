@@ -151,39 +151,26 @@ const Index = () => {
           )}
         </div>
 
-        <div className="container relative z-10 mx-auto px-4 pt-32 pb-12 md:pt-24 md:pb-0">
-          <div className="absolute -top-10 -left-10 w-72 h-72 bg-primary/10 rounded-full blur-[100px] pointer-events-none -z-10" />
-          <div className="mb-4 flex flex-wrap items-center gap-3 animate-fade-in">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/20">
-              <Sparkles className="h-3 w-3" /> Celebrating 2 Years
-            </span>
-            <p className="text-[10px] md:text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground font-body">
-              Private Theatre & Party Hall
-            </p>
-          </div>
-          <h1 className="mb-6 max-w-4xl 3xl:max-w-6xl font-display text-4xl font-bold leading-tight text-foreground md:text-7xl 3xl:text-9xl animate-slide-up">
-            Best <span className="text-gradient-gold">Private Theatre</span> & Party Hall
-          </h1>
-          <p className="mb-8 md:mb-10 max-w-xl 3xl:max-w-4xl text-base md:text-lg 3xl:text-3xl leading-relaxed text-muted-foreground font-body animate-slide-up delay-100">
-            Book the <strong>best private theatre in Eluru</strong> or a <strong>premium private theatre in Bhimavaram</strong> for birthdays, anniversaries, proposals, or just a night out with friends. Affordable packages with custom decorations and cake.
-          </p>
-          <div className="flex flex-wrap items-center gap-4 animate-slide-up delay-200">
+        <div className="absolute bottom-6 left-4 z-20 w-[calc(100%-2rem)] max-w-md animate-slide-up delay-200 md:bottom-10 md:left-8 md:w-auto">
+          <div className="rounded-2xl border border-white/20 bg-background/90 p-3 shadow-2xl backdrop-blur-md">
+            <div className="flex flex-wrap items-center gap-2">
             <Link
               to="/booking"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:scale-105 glow-gold font-body"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] glow-gold font-body"
             >
               Book Now <ArrowRight className="h-4 w-4" />
             </Link>
             <a
               href="#services"
-              className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/60 backdrop-blur-sm px-6 py-2.5 text-sm font-medium text-foreground transition-all hover:border-primary hover:text-primary font-body"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary font-body"
             >
               <Play className="h-4 w-4" /> View Services
             </a>
           </div>
-          <a href={`tel:${branchDetails[0].phone.replace(/\s/g, "")}`} className="mt-8 inline-flex items-center gap-2 text-sm text-muted-foreground font-body hover:text-primary transition-colors">
+          <a href={`tel:${branchDetails[0].phone.replace(/\s/g, "")}`} className="mt-3 flex items-center justify-center gap-2 border-t border-border pt-3 text-[20px] text-muted-foreground font-body transition-colors hover:text-primary">
               <Phone className="h-4 w-4 text-primary" /> Call us: {branchDetails[0].phone}
-            </a>
+          </a>
+          </div>
         </div>
       </section>
 
@@ -352,7 +339,6 @@ const Index = () => {
               >
                 <div className="relative h-80 overflow-hidden">
                   <img src={service.img} alt={service.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" width={1000} height={600} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
                 </div>
                 <div className="p-8">
                   <h3 className="mb-3 font-display text-3xl font-bold text-gradient-gold">{service.title}</h3>

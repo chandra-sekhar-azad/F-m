@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/Navbar";
+import LoopBanner from "@/components/LoopBanner";
 import { fetchBranches } from "@/lib/booking-data";
 import Loader from "@/components/Loader";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -37,7 +38,9 @@ const AppShell = () => {
   return (
     <div className="min-h-screen">
       {!hideNavbar && <Navbar />}
+      {!hideNavbar && <LoopBanner />}
       {/* Suspense boundary: shows a spinner while lazy chunks are downloading */}
+      <div className={hideNavbar ? "" : "pt-8"}>
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">
           <Loader />
@@ -63,6 +66,7 @@ const AppShell = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      </div>
     </div>
   );
 };

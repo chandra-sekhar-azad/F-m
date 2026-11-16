@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { api, API_BASE, Branch, CakeOption, ExtraDecoration } from "../lib/api";
 import { BookingData, INITIAL_BOOKING, DECORATION_PRICE } from "../lib/booking-data";
-import { getEffectivePrice, getOriginalPrice, hasOffer } from "../lib/utils";
+import { getEffectivePrice } from "../lib/utils";
 import { branchDetails } from "@/data/branch-details";
 
 const formatServiceName = (serviceId: string) => {
@@ -46,6 +46,15 @@ const formatSlotRange = (startTime: string, durationHours: number) => {
   return `${startTime} - ${to12HourTime(endMinutes)}`;
 };
 
+const toLocalDateString = (date = new Date()) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+const hasSlotStarted = (date: string, slot: string, now: Date) => {
+  if (date !== toLocalDateString(now)) return false;
+  const slotMinutes = parse12HourTime(slot);
+  return slotMinutes !== null && slotMinutes <= now.getHours() * 60 + now.getMinutes();
+};
+
 const ALL_STEPS = [
   "Select Branch & Service",
   "Date, Time & Details",
@@ -60,6 +69,32 @@ const STEP_ICONS = [MapPin, Clock, PartyPopper, Cake, Sparkles, Check, CreditCar
 const OccasionStep = lazy(() => import("./booking/OccasionStep"));
 const CakeStep = lazy(() => import("./booking/CakeStep"));
 const DecorationsStep = lazy(() => import("./booking/DecorationsStep"));
+
+const BOOKING_DRAFT_TTL_MS = 2 * 60 * 60 * 1000;
+const BOOKING_DRAFT_EXPIRY_KEY = "bookingStateExpiresAt";
+
+const clearSavedBookingDraft = () => {
+  localStorage.removeItem("bookingState");
+  localStorage.removeItem("bookingStep");
+  localStorage.removeItem(BOOKING_DRAFT_EXPIRY_KEY);
+};
+
+const isBhimavaramBranch = (branchId: string, branches: Branch[]) =>
+  branchId === "branch-2" || branches.find((branch) => branch.id === branchId)?.name.toLowerCase().includes("bhimavaram") === true;
+
+const getMemberLimit = (branchId: string, branches: Branch[]) =>
+  isBhimavaramBranch(branchId, branches) ? 15 : 20;
+
+const getExtraPersonCharge = (branchId: string, branches: Branch[], membersCount: number) =>
+  isBhimavaramBranch(branchId, branches) ? 0 : Math.max(0, membersCount - 10) * 150;
+
+const DEFAULT_BHIMAVARAM_HALLS = [
+  { id: "prime", name: "Prime Screen (Large)" },
+  { id: "private", name: "Private Screen (Mini)" },
+];
+
+const getDefaultHallId = (branchId: string, halls: { id: string }[]) =>
+  branchId === "branch-2" ? (halls[0]?.id || DEFAULT_BHIMAVARAM_HALLS[0].id) : "";
 
 const BookingPage = () => {
   const [step, setStep] = useState(0);
@@ -84,11 +119,28 @@ const BookingPage = () => {
   const [searchParams] = useSearchParams();
   const [lastFetchedBranch, setLastFetchedBranch] = useState<string>("");
   const [decorationMuted, setDecorationMuted] = useState<Record<string, boolean>>({});
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const bookingExpiryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleBookingDraftExpiry = (expiresAt: number) => {
+    if (bookingExpiryTimer.current) clearTimeout(bookingExpiryTimer.current);
+    bookingExpiryTimer.current = setTimeout(() => {
+      clearSavedBookingDraft();
+      setBooking({ ...INITIAL_BOOKING });
+      setStep(0);
+    }, Math.max(0, expiresAt - Date.now()));
+  };
 
   // Load booking state from localStorage on mount
   useEffect(() => {
     const savedBooking = localStorage.getItem('bookingState');
     const savedStep = localStorage.getItem('bookingStep');
+    const expiresAt = Number(localStorage.getItem(BOOKING_DRAFT_EXPIRY_KEY));
+
+    if (savedBooking && (!expiresAt || expiresAt <= Date.now())) {
+      clearSavedBookingDraft();
+      return;
+    }
 
     if (savedBooking) {
       try {
@@ -105,6 +157,7 @@ const BookingPage = () => {
         }
         
         setBooking(parsedBooking);
+        scheduleBookingDraftExpiry(expiresAt);
       } catch (error) {
         console.error('Failed to restore booking state:', error);
       }
@@ -120,12 +173,25 @@ const BookingPage = () => {
     }
   }, []);
 
+  useEffect(() => () => {
+    if (bookingExpiryTimer.current) clearTimeout(bookingExpiryTimer.current);
+  }, []);
+
+  // Keep the list current when a slot passes while this page remains open.
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Save booking state to localStorage — debounced to avoid writing on every keystroke
   const saveBookingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (saveBookingTimer.current) clearTimeout(saveBookingTimer.current);
     saveBookingTimer.current = setTimeout(() => {
       localStorage.setItem('bookingState', JSON.stringify(booking));
+      const expiresAt = Date.now() + BOOKING_DRAFT_TTL_MS;
+      localStorage.setItem(BOOKING_DRAFT_EXPIRY_KEY, String(expiresAt));
+      scheduleBookingDraftExpiry(expiresAt);
     }, 500);
     return () => {
       if (saveBookingTimer.current) clearTimeout(saveBookingTimer.current);
@@ -178,8 +244,11 @@ const BookingPage = () => {
         setLastFetchedBranch(initialBranch);
 
         const services = Object.keys(data.pricing);
+        const defaultHall = getDefaultHallId(initialBranch, data.halls || []);
         if (services.length === 1 && !booking.service) {
-          setBooking(prev => ({ ...prev, service: services[0] as any, branch: initialBranch }));
+          setBooking(prev => ({ ...prev, service: services[0] as any, branch: initialBranch, hall: prev.hall || defaultHall }));
+        } else if (defaultHall && !booking.hall) {
+          setBooking(prev => ({ ...prev, hall: defaultHall }));
         }
       } catch (error) {
         console.error("Failed to initialize booking data:", error);
@@ -209,18 +278,19 @@ const BookingPage = () => {
           const services = Object.keys(data.pricing);
           const isBhimavaram = booking.branch === "branch-2" ||
             data.branches.find(b => b.id === booking.branch)?.name.toLowerCase().includes("bhimavaram");
+          const defaultHall = isBhimavaram ? getDefaultHallId(booking.branch, data.halls || []) : '';
 
           if (services.length === 1) {
             setBooking(prev => ({
               ...prev,
-              hall: '',  // reset hall on branch change
+              hall: defaultHall,
               service: services[0] as any,
-              membersCount: (isBhimavaram && prev.membersCount > 10) ? 10 : prev.membersCount,
+              membersCount: Math.min(prev.membersCount, isBhimavaram ? 15 : 20),
             }));
           } else if (isBhimavaram) {
-            setBooking(prev => ({ ...prev, hall: '', ...(prev.membersCount > 10 ? { membersCount: 10 } : {}) }));
+            setBooking(prev => ({ ...prev, hall: defaultHall, ...(prev.membersCount > 15 ? { membersCount: 15 } : {}) }));
           } else {
-            setBooking(prev => ({ ...prev, hall: '' }));
+            setBooking(prev => ({ ...prev, hall: '', ...(prev.membersCount > 20 ? { membersCount: 20 } : {}) }));
           }
         } catch (error) {
           console.error("Failed to update branch data:", error);
@@ -306,6 +376,14 @@ const BookingPage = () => {
   }, [step, decorationsLoaded]);
 
   const update = (partial: Partial<BookingData>) => setBooking((prev) => ({ ...prev, ...partial }));
+  const selectableHalls = useMemo(
+    () => halls.length > 0 ? halls : (isBhimavaramBranch(booking.branch, branches) ? DEFAULT_BHIMAVARAM_HALLS : []),
+    [booking.branch, branches, halls],
+  );
+  const selectableSlots = useMemo(
+    () => availableSlots.filter((slot) => !hasSlotStarted(booking.date, slot, currentTime)),
+    [availableSlots, booking.date, currentTime],
+  );
 
   const SERVICE_CHARGE = 11;
 
@@ -368,16 +446,14 @@ const BookingPage = () => {
     if (booking.selectedCake) total += getEffectivePrice(booking.selectedCake);
     booking.extraDecorations.forEach((d) => (total += getEffectivePrice(d)));
 
-    // Extra person charge for Branch 1
-    if (booking.branch === "branch-1" && booking.membersCount > 10) {
-      total += (booking.membersCount - 10) * 150;
-    }
+    // Eluru includes 10 guests; each additional guest costs ₹150.
+    total += getExtraPersonCharge(booking.branch, branches, booking.membersCount);
 
     // Fixed platform service charge
     total += SERVICE_CHARGE;
 
     return total;
-  }, [booking, pricing, decorationPrice]);
+  }, [booking, branches, pricing, decorationPrice]);
 
   const originalTotalPrice = useMemo(() => {
     let total = 0;
@@ -404,12 +480,10 @@ const BookingPage = () => {
     if (booking.selectedCake) total += getOriginal(booking.selectedCake);
     booking.extraDecorations.forEach((d) => (total += getOriginal(d)));
 
-    if (booking.branch === "branch-1" && booking.membersCount > 10) {
-      total += (booking.membersCount - 10) * 150;
-    }
+    total += getExtraPersonCharge(booking.branch, branches, booking.membersCount);
     total += SERVICE_CHARGE;
     return total;
-  }, [booking, pricing, decorationPrice]);
+  }, [booking, branches, pricing, decorationPrice]);
 
   const advanceAmount = useMemo(() => totalPrice < 3000 ? 1011 : 1511, [totalPrice]);
   const balanceAmount = useMemo(() => totalPrice - advanceAmount, [totalPrice, advanceAmount]);
@@ -422,13 +496,12 @@ const BookingPage = () => {
         const selectedBranch = branches.find(b => b.id === booking.branch);
         if (selectedBranch?.bookingsEnabled === false) return false;
         // require hall selection if this branch has multiple halls
-        if (halls.length > 0 && !booking.hall) return false;
+        if (selectableHalls.length > 0 && !booking.hall) return false;
         return true;
       }
       case 1:
-        const isBhimavaram = booking.branch === "branch-2" || branches.find(b => b.id === booking.branch)?.name.toLowerCase().includes("bhimavaram");
-        const isCountOk = isBhimavaram ? booking.membersCount <= 10 : true;
-        return !!booking.date && !!booking.duration && !!booking.timeSlot && !!booking.name && !!booking.phone && booking.membersCount > 0 && isCountOk;
+        const isCountOk = booking.membersCount <= getMemberLimit(booking.branch, branches);
+        return !!booking.date && !!booking.duration && !!booking.timeSlot && !hasSlotStarted(booking.date, booking.timeSlot, currentTime) && !!booking.name && !!booking.phone && booking.membersCount > 0 && isCountOk;
       case 2: return !!booking.occasion;
       default: return true;
     }
@@ -455,7 +528,7 @@ const BookingPage = () => {
     try {
       setPaymentLoading(true);
 
-      const extraCharge = (booking.branch === "branch-1" && booking.membersCount > 10) ? (booking.membersCount - 10) * 150 : 0;
+      const extraCharge = getExtraPersonCharge(booking.branch, branches, booking.membersCount);
       const amountToPay = advanceAmount; // always advance
 
       const bookingData = {
@@ -473,8 +546,7 @@ const BookingPage = () => {
 
       if (method === "mock") {
         const payment = await api.processMockPayment(createdBooking.id, amountToPay, paymentType);
-        localStorage.removeItem('bookingState');
-        localStorage.removeItem('bookingStep');
+        clearSavedBookingDraft();
         navigate('/booking-confirmed', {
           state: {
             booking: payment.booking,
@@ -524,8 +596,7 @@ const BookingPage = () => {
             console.log("✅ Payment successful via Razorpay!", response);
 
             // Immediately clear localStorage and prepare redirect
-            localStorage.removeItem('bookingState');
-            localStorage.removeItem('bookingStep');
+            clearSavedBookingDraft();
 
 
 
@@ -628,29 +699,6 @@ const BookingPage = () => {
           </div>
         ) : (
           <>
-            {/* Anniversary Banner */}
-            <div className="mb-8 overflow-hidden rounded-2xl bg-gradient-gold p-[1px] glow-gold animate-pulse-slow">
-              <div className="flex flex-col items-center justify-center gap-2 rounded-[calc(1rem-1px)] bg-card/90 px-4 py-3 text-center md:flex-row md:gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <span className="font-display text-sm font-bold text-foreground">2nd Anniversary offer on Bhimavaram Branch</span>
-                </div>
-                <p className="text-xs text-muted-foreground font-body">Discount On Premium Pack</p>
-                <div className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary border border-primary/20">
-                  Up to 20% OFF
-                </div>
-                <button
-                  onClick={() => reloadPricingData()}
-                  title="Refresh prices in real-time"
-                  className="ml-auto md:ml-0 p-2 rounded-full hover:bg-primary/10 transition-colors"
-                >
-                  <RefreshCw className="h-4 w-4 text-primary" />
-                </button>
-              </div>
-            </div>
-
             {/* Progress */}
             <div className="mb-10 flex items-center justify-between overflow-x-auto pb-2">
               {STEPS.map((s, i) => {
@@ -680,7 +728,7 @@ const BookingPage = () => {
                 {step < 5 && (
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground font-body">Total Estimation</p>
-                    <p className="text-lg font-bold text-primary font-display flex items-center justify-end gap-2">
+                    <p className="text-2xl font-bold text-primary font-display flex items-center justify-end gap-2 md:text-3xl">
                       {originalTotalPrice > totalPrice && (
                         <span className="text-sm text-muted-foreground line-through decoration-red-500/50">
                           ₹{originalTotalPrice.toLocaleString()}
@@ -745,11 +793,11 @@ const BookingPage = () => {
                     </div>
                   </div>
                   {/* Hall selector — only shown when selected branch has multiple halls */}
-                  {halls.length > 0 && (
+                  {selectableHalls.length > 0 && (
                     <div>
                       <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Screen</label>
                       <div className="grid gap-3 grid-cols-2">
-                        {halls.map((hall) => {
+                        {selectableHalls.map((hall) => {
                           const isPaused = hall.bookingsEnabled === false;
                           return (
                             <button
@@ -825,11 +873,11 @@ const BookingPage = () => {
                         name="date"
                         type="date"
                         value={booking.date}
-                        min={new Date().toISOString().split("T")[0]}
-                        max={(() => { const d = new Date(); d.setMonth(d.getMonth() + 6); return d.toISOString().split("T")[0]; })()}
+                        min={toLocalDateString()}
+                        max={(() => { const d = new Date(); d.setMonth(d.getMonth() + 6); return toLocalDateString(d); })()}
                         onChange={(e) => {
                           const selected = e.target.value;
-                          const today = new Date().toISOString().split("T")[0];
+                          const today = toLocalDateString();
                           if (selected < today) return; // block past dates
                           update({ date: selected, timeSlot: "" });
                         }}
@@ -843,24 +891,25 @@ const BookingPage = () => {
                         name="membersCount"
                         type="number"
                         min="1"
-                        max={(booking.branch === "branch-2" || branches.find(b => b.id === booking.branch)?.name.toLowerCase().includes("bhimavaram")) ? 10 : undefined}
+                        max={getMemberLimit(booking.branch, branches)}
                         value={booking.membersCount || ""}
                         onChange={(e) => {
                           let val = parseInt(e.target.value) || 0;
-                          const isBhimavaram = booking.branch === "branch-2" || branches.find(b => b.id === booking.branch)?.name.toLowerCase().includes("bhimavaram");
-                          if (isBhimavaram && val > 10) val = 10;
+                          val = Math.min(val, getMemberLimit(booking.branch, branches));
                           update({ membersCount: val });
                         }}
                         className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground font-body focus:border-primary focus:outline-none"
                       />
-                      {booking.branch === "branch-1" && booking.membersCount > 10 && (
+                      {!isBhimavaramBranch(booking.branch, branches) && booking.membersCount > 10 && (
                         <p className="mt-1 text-[10px] text-primary font-body animate-pulse">
                           * Extra {(booking.membersCount - 10)} persons: +₹{(booking.membersCount - 10) * 150}
                         </p>
                       )}
-                      {(booking.branch === "branch-2" || branches.find(b => b.id === booking.branch)?.name.toLowerCase().includes("bhimavaram")) && (
+                      {booking.branch && (
                         <p className="mt-1 text-[10px] text-red-500 font-bold font-body animate-bounce">
-                          * Maximum 15 persons allowed for Bhimavaram branch.
+                          {isBhimavaramBranch(booking.branch, branches)
+                            ? "* Maximum 15 persons allowed for Bhimavaram branch."
+                            : "* 10 persons included. Extra persons are ₹150 each (maximum 20 persons)."}
                         </p>
                       )}
                     </div>
@@ -886,8 +935,8 @@ const BookingPage = () => {
                     <div>
                       <label className="mb-2 block text-sm font-medium text-foreground font-body">Available Time Slots</label>
                       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                        {availableSlots.length > 0 ? (
-                          availableSlots.map((slot) => {
+                        {selectableSlots.length > 0 ? (
+                          selectableSlots.map((slot) => {
                             const isBooked = bookedSlots.includes(slot);
                             const displayRange = formatSlotRange(slot, booking.duration);
                             return (
@@ -1004,102 +1053,24 @@ const BookingPage = () => {
                 <div className="space-y-4">
                   {[
                     { label: "Branch", value: branchDetails.find((branch) => branch.id === booking.branch)?.name || booking.branch },
-                    ...(booking.hall ? [{ label: "Hall", value: halls.find(h => h.id === booking.hall)?.name || booking.hall }] : []),
+                    ...(booking.hall ? [{ label: "Hall", value: selectableHalls.find((hall) => hall.id === booking.hall)?.name || booking.hall }] : []),
                     { label: "Service", value: formatServiceName(booking.service || "") },
                     { label: "Date", value: booking.date },
-                    { label: "Time", value: `${booking.timeSlot} (${booking.duration}hr)` },
-                    { label: "Members", value: `${booking.membersCount} Persons` },
+                    { label: "Time", value: `${formatSlotRange(booking.timeSlot, booking.duration)} (${booking.duration} Hour${booking.duration > 1 ? "s" : ""})` },
+                    { label: "Members", value: `${booking.membersCount}` },
                     { label: "Name", value: booking.name },
                     { label: "Occasion", value: booking.occasion === "Other" ? booking.customOccasion || "Other" : booking.occasion },
-                    ...(isPremiumPack ? [] : [{ label: "Decoration", value: `Yes` }]),
-                    {
-                      label: (() => {
-                        let servicePrice;
-                        if (booking.hall && pricing[booking.service]?.[booking.hall]) {
-                          servicePrice = pricing[booking.service][booking.hall]?.[booking.duration];
-                        } else {
-                          servicePrice = pricing[booking.service]?.[booking.duration];
-                        }
-                        if (typeof servicePrice === 'object' && servicePrice?.offerPrice != null) return "Offer price";
-                        return "Price";
-                      })(),
-                      value: (() => {
-                        let servicePrice;
-                        if (booking.hall && pricing[booking.service]?.[booking.hall]) {
-                          servicePrice = pricing[booking.service][booking.hall]?.[booking.duration];
-                        } else {
-                          servicePrice = pricing[booking.service]?.[booking.duration];
-                        }
-                        if (!servicePrice) return "N/A";
-                        if (typeof servicePrice === 'object' && servicePrice.price !== undefined) {
-                          const hasOfferPrice = servicePrice.offerPrice !== undefined && servicePrice.offerPrice !== null;
-                          if (hasOfferPrice) {
-                            return (
-                              <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                                <span className="text-secondary font-bold text-base">₹{servicePrice.offerPrice}</span>
-                                <span className="line-through text-muted-foreground/50 italic text-[10px]">₹{servicePrice.price}</span>
-                                <span className="text-[9px] bg-secondary/20 px-1.5 py-0.5 rounded-full text-secondary font-bold uppercase tracking-wider whitespace-nowrap">Offer</span>
-                              </div>
-                            );
-                          }
-                          return `₹${servicePrice.price}`;
-                        }
-                        return `₹${servicePrice}`;
-                      })()
-                    },
-                    ...(!isPremiumPack ? [{
-                      label: "Cake",
-                      value: booking.selectedCake
-                        ? (
-                          <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-bold">{booking.selectedCake.name}</span>
-                            {hasOffer(booking.selectedCake) ? (
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="line-through text-muted-foreground/60 text-[10px]">₹{getOriginalPrice(booking.selectedCake)}</span>
-                                <span className="text-green-500 font-bold">₹{getEffectivePrice(booking.selectedCake)}</span>
-                              </div>
-                            ) : (
-                              <span className="text-primary font-bold">₹{booking.selectedCake.price}</span>
-                            )}
-                          </div>
-                        )
-                        : "None"
-                    }] : []),
+                    { label: "Decoration", value: "Included" },
+                    { label: "Total Price", value: `₹${originalTotalPrice.toLocaleString()}` },
+                    { label: "Offer Price", value: `₹${totalPrice.toLocaleString()}` },
+                    { label: "Cake", value: booking.selectedCake ? `${booking.selectedCake.name} (${booking.selectedCake.quantity || "1kg"})` : "No" },
+                    { label: "Service & Maintenance Charge", value: `₹${SERVICE_CHARGE}` },
                   ].map((item) => (
                     <div key={item.label} className="flex justify-between border-b border-border pb-3 items-start gap-4">
                       <span className="text-xs text-muted-foreground font-body shrink-0">{item.label}</span>
                       <div className="text-xs font-medium text-foreground font-body text-right">{item.value as any}</div>
                     </div>
                   ))}
-
-                  {booking.branch === "branch-1" && booking.membersCount > 10 && (
-                    <div className="flex justify-between border-b border-border pb-2">
-                      <span className="text-xs text-primary font-bold font-body">Extra Persons (&gt;10)</span>
-                      <span className="text-xs font-bold text-primary font-body">₹{(booking.membersCount - 10) * 150}</span>
-                    </div>
-                  )}
-
-                  {!isPremiumPack && booking.extraDecorations.length > 0 && (
-                    <div className="border-b border-border pb-2">
-                      <span className="text-xs text-muted-foreground font-body">Extras</span>
-                      <div className="mt-1 space-y-1">
-                        {booking.extraDecorations.map((d) => (
-                          <div key={d.id} className="flex justify-between">
-                            <span className="text-[10px] text-foreground font-body">{d.name}</span>
-                            <span className="text-[10px] text-primary font-body">
-                              ₹{getEffectivePrice(d)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Service/Maintenance charge line */}
-                  <div className="flex justify-between border-b border-border pb-2">
-                    <span className="text-xs text-muted-foreground font-body">Service &amp; Maintenance Charge</span>
-                    <span className="text-xs font-bold text-foreground font-body">₹11</span>
-                  </div>
 
                   <div className="flex justify-between pt-2">
                     <span className="text-lg font-bold text-foreground font-display">Grand Total</span>

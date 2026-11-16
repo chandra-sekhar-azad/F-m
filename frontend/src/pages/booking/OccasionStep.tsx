@@ -23,7 +23,6 @@ const OccasionStep = ({ booking, occasions, stepLoading, update }: OccasionStepP
             </p>
           </div>
           <div>
-            <label className="mb-3 block text-sm font-medium text-foreground font-body">Select Occasion</label>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
               {occasions.map((o) => (
                 <button
